@@ -466,7 +466,10 @@ export async function deletePage(pageId: string, userId: string) {
     .delete()
     .eq("id", pageId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("❌ ERROR deletePage:", error);
+    throw error;
+  }
 }
 
 

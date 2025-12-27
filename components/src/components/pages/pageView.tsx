@@ -156,20 +156,27 @@ const PageView: React.FC = () => {
       console.warn('Blocked: user has no edit permissions');
       return;
     }
-    // Repositories might be checking created_by (profile.id) or permissions (UUID)
-    // Given the FK constraint, Repo should probably use profile.id
-    await Repo.deletePage(pageId, profile.id);
-    if (!activeCompanyId) return;
 
-    const list = await loadPages(activeCompanyId, false);
+    try {
+      // Repositories might be checking created_by (profile.id) or permissions (UUID)
+      // Given the FK constraint, Repo should probably use profile.id
+      await Repo.deletePage(pageId, profile.id);
 
-    // If we deleted the active page, pick another one
-    if (pageId === currentPageId) {
-      if (list.length > 0) setCurrentPageId(list[0].id);
-      else {
-        setCurrentPageId(null);
-        setCurrentPage(null);
+      if (!activeCompanyId) return;
+
+      const list = await loadPages(activeCompanyId, false);
+
+      // If we deleted the active page, pick another one
+      if (pageId === currentPageId) {
+        if (list.length > 0) setCurrentPageId(list[0].id);
+        else {
+          setCurrentPageId(null);
+          setCurrentPage(null);
+        }
       }
+    } catch (error: any) {
+      console.error("Error deleting page:", error);
+      alert(t('deletePageError') || `Error eliminando la página: ${error.message || 'Error desconocido'}`);
     }
   };
 
