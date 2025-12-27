@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "module": "ESNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "jsx": "react-jsx",
+
+    "baseUrl": ".",               // ← ¡Este es el que faltaba!
+    "paths": {
+      "@/*": ["src/*"]            // ← esto ya lo tienes bien
+    },
+
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}
