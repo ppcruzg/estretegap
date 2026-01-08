@@ -209,6 +209,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && <span className="text-sm font-medium">{t('signOut')}</span>}
         </button>
       </div>
+
+      {/* VERSIÓN */}
+      <div className="py-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center">
+        <span className="text-[10px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-widest leading-none">
+          v1.0.0
+        </span>
+      </div>
     </div>
   );
 };
