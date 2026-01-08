@@ -342,12 +342,12 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
                   onSave={onUpdateDescription}
                   onEditingChange={setIsEditing}
                   variant="dark"
-                  className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"
+                  className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1 block w-full"
                   placeholder={t('addDescription')}
                   multiline
                 />
               ) : (
-                description && <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">{description}</p>
+                description && <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed block w-full">{description}</p>
               )}
             </div>
 

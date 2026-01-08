@@ -144,8 +144,15 @@ const EditableText: React.FC<EditableTextProps> = ({
   };
 
   useEffect(() => {
-    if (isEditing && inputRef.current) inputRef.current.focus();
-  }, [isEditing]);
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      if (multiline) {
+        // Auto-expand textarea
+        inputRef.current.style.height = 'auto';
+        inputRef.current.style.height = inputRef.current.scrollHeight + 'px';
+      }
+    }
+  }, [isEditing, multiline, tempValue]);
 
   const stopPropagation = (e: React.MouseEvent | React.PointerEvent) => {
     e.stopPropagation();
@@ -172,8 +179,7 @@ const EditableText: React.FC<EditableTextProps> = ({
               setTimeout(handleBlur, 200);
             }}
             onKeyDown={handleKeyDown}
-            className={`${baseInputStyles} ${variantStyles} resize-none ${className}`}
-            rows={3}
+            className={`${baseInputStyles} ${variantStyles} overflow-hidden resize-none ${className}`}
             placeholder={placeholder}
           />
 
