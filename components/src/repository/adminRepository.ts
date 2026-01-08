@@ -44,7 +44,7 @@ export async function signUpAdminUser(email: string, name: string, companyId?: s
             data: {
                 full_name: name,
             },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: import.meta.env.VITE_SITE_URL || window.location.origin,
         }
     });
 

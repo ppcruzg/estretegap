@@ -236,7 +236,7 @@ export async function deleteColumn(columnId: string) {
 
 export async function reorderColumns(pageId: string, orderedIds: string[]) {
   const updates = orderedIds.map((columnId, index) =>
-    supabase.from("columns").update({ position: index }).eq("id", columnId)
+    supabase.from("columns").update({ page_id: pageId, position: index }).eq("id", columnId)
   );
 
   await Promise.all(updates);
@@ -306,7 +306,7 @@ export async function deleteItem(itemId: string) {
 
 export async function reorderItems(columnId: string, orderedIds: string[]) {
   const updates = orderedIds.map((id, index) =>
-    supabase.from("items").update({ position: index }).eq("id", id)
+    supabase.from("items").update({ column_id: columnId, position: index }).eq("id", id)
   );
 
   await Promise.all(updates);
