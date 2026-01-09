@@ -7,6 +7,7 @@ La Pantalla Principal de **ESTRATEGA** es el centro neurálgico para la gestión
 
 ---
 
+
 ## 2. DICCIONARIO DE LA INTERFAZ (UI)
 
 ### A. Barra Lateral (Sidebar)

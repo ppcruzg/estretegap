@@ -28,7 +28,7 @@ import {
   User,
   Sparkles,
 } from 'lucide-react';
-import { extractItemDataFromDescription } from './src/services/aiService';
+
 
 interface DiagramNodeProps {
   label: string;
@@ -102,7 +102,6 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { t, language } = useTranslation();
 
   const fallbackStatuses: StatusCategory[] = [
@@ -111,28 +110,6 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
     { id: 'bloq', status_id: 'bloqueado', label: t('blocked'), color: 'rose' },
   ];
 
-  // ----------------------------------------
-  // EXTRAER DATOS CON IA
-  // ----------------------------------------
-  const handleAIAssist = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isAnalyzing) return;
-
-    setIsAnalyzing(true);
-    try {
-      const result = await extractItemDataFromDescription(description || '', availableStatuses, label);
-
-      if (result.title) onUpdateLabel?.(result.title);
-      if (result.date) onUpdateDate?.(result.date);
-      if (result.summary) onUpdateDescription?.(result.summary);
-      if (result.responsible) onUpdateResponsible?.(result.responsible);
-      if (result.status) onUpdateStatus?.(result.status);
-    } catch (error) {
-      console.error("AI Error:", error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
   // ----------------------------------------
   // FORMATEAR FECHAS
@@ -391,22 +368,7 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
               )}
             </div>
 
-            {canEdit && (
-              <button
-                onClick={handleAIAssist}
-                disabled={isAnalyzing}
-                title={t('aiAssist')}
-                className={`flex-shrink-0 p-1.5 rounded-lg transition-all duration-300 shadow-sm border
-                  ${isAnalyzing
-                    ? 'bg-purple-100 text-purple-600 animate-pulse border-purple-200'
-                    : description
-                      ? 'bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-600 hover:text-white hover:shadow-purple-200 opacity-100'
-                      : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 opacity-40 hover:opacity-100'
-                  }`}
-              >
-                {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-              </button>
-            )}
+
           </div>
         </div>
 
