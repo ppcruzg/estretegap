@@ -199,6 +199,19 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
   // ITEM DRAG & DROP
   // ------------------------------
   const handleItemDragStart = (e: React.DragEvent, columnId: string, itemId: string) => {
+    // Prevent drag if user is selecting text
+    const target = e.target as HTMLElement;
+    const isTextElement = target.tagName === 'P' ||
+      target.tagName === 'SPAN' ||
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.closest('[data-text-area]');
+
+    if (isTextElement) {
+      e.preventDefault();
+      return;
+    }
+
     e.stopPropagation();
     setDragItem({ colId: columnId, itemId });
     setDropPreview(null);
@@ -304,19 +317,16 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
           return (
             <div
               key={col.id}
-              draggable
-              onDragStart={() => handleColumnDragStart(col.id)}
-              onDragEnd={handleColumnDragEnd}
               onDragEnter={() => handleColumnDragEnter(col.id)}
               onDragOver={(e) => {
-                if (dragColumn) e.preventDefault();
+                e.preventDefault();
               }}
               onDrop={() => handleColumnDrop(col.id)}
               className={`group rounded-2xl border-2 shadow-lg hover:shadow-xl bg-white dark:bg-slate-900 transition-all duration-300 relative ${isDragging
-                ? "opacity-40 border-blue-400 scale-95 shadow-2xl cursor-grabbing rotate-1"
+                ? "opacity-40 border-blue-400 scale-95 shadow-2xl rotate-1"
                 : isOver
                   ? "border-blue-400 ring-4 ring-blue-100 dark:ring-blue-900/30 scale-[1.02] z-50 shadow-2xl"
-                  : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-grab"
+                  : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                 }`}
             >
               {/* Overlay indicador de drop para el grupo */}
@@ -330,7 +340,12 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
               )}
 
               {/* ================= HEADER DEL GRUPO ================= */}
-              <div className={`relative flex items-center justify-between p-4 text-white ${tone} shadow-md rounded-t-[14px] cursor-grab active:cursor-grabbing`}>
+              <div
+                className={`group-header relative flex items-center justify-between p-4 text-white ${tone} shadow-md rounded-t-[14px] cursor-grab active:cursor-grabbing`}
+                draggable={true}
+                onDragStart={() => handleColumnDragStart(col.id)}
+                onDragEnd={handleColumnDragEnd}
+              >
 
                 {/* TÍTULO */}
                 <input
@@ -427,8 +442,6 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 {col.items.map((item: any, idx: number) => (
                   <div
                     key={item.id}
-                    draggable
-                    onDragStart={(e) => handleItemDragStart(e, col.id, item.id)}
                     onDragOver={(e) => {
                       e.preventDefault();
                       handleItemDragEnter(e, col.id, item.id);
@@ -468,6 +481,9 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                       responsible={item.responsible}
                       onUpdateResponsible={(val) => onUpdateItem(col.id, item.id, { responsible: val })}
                       canEdit={canEdit}
+                      onDragStart={(e) => handleItemDragStart(e, col.id, item.id)}
+                      columnId={col.id}
+                      itemId={item.id}
                     />
                   </div>
                 ))}

@@ -233,7 +233,10 @@ const EditableText: React.FC<EditableTextProps> = ({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className={`cursor-pointer rounded px-1 -ml-1 border border-transparent transition-all relative group 
+      onMouseDown={(e) => e.stopPropagation()}
+      onDragStart={(e) => e.stopPropagation()}
+      draggable={false}
+      className={`select-text cursor-text rounded px-1 -ml-1 border border-transparent transition-all relative group 
         ${variant === 'light' ? 'hover:bg-white/10 hover:border-white/10' : 'hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700'} 
         ${!value ? 'italic opacity-60 text-xs py-1' : ''}
         ${className}`}

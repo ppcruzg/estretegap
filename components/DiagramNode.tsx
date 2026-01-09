@@ -49,6 +49,9 @@ interface DiagramNodeProps {
   onUpdateStatus?: (newStatusId: string) => void;
   onUpdateResponsible?: (val: string) => void;
   canEdit?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  columnId?: string;
+  itemId?: string;
 }
 
 const colorStyles: Record<TailwindColor, string> = {
@@ -93,6 +96,9 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
   onUpdateResponsible,
   responsible,
   canEdit = false,
+  onDragStart,
+  columnId,
+  itemId,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
@@ -201,8 +207,21 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
               </div>
               <div className="p-1.5 space-y-0.5 max-h-[300px] overflow-y-auto overscroll-contain">
                 {list.map((s) => {
-                  const sStyle = colorStyles[s.color] || colorStyles.slate;
                   const isActive = s.status_id === status;
+
+                  // Mapeo dinámico de colores para los círculos (dots)
+                  const dotColors: Record<string, string> = {
+                    emerald: 'bg-emerald-500',
+                    blue: 'bg-blue-500',
+                    rose: 'bg-rose-500',
+                    amber: 'bg-amber-500',
+                    purple: 'bg-purple-500',
+                    slate: 'bg-slate-400',
+                    indigo: 'bg-indigo-500',
+                    cyan: 'bg-cyan-500',
+                  };
+
+                  const dotColor = dotColors[s.color] || dotColors.slate;
 
                   return (
                     <button
@@ -215,7 +234,7 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
                       className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700 group ${isActive ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${s.color === 'emerald' ? 'bg-emerald-500' : s.color === 'blue' ? 'bg-blue-500' : s.color === 'rose' ? 'bg-rose-500' : 'bg-slate-400'}`} />
+                        <span className={`w-2 h-2 rounded-full ${dotColor}`} />
                         <span className={`font-medium ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>{s.label}</span>
                       </div>
                       {isActive && <CheckCircle size={12} className="text-blue-500 dark:text-blue-400" />}
@@ -299,14 +318,28 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
   return (
     <div className={`group flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-all duration-200 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-md relative bg-white dark:bg-slate-900 ${isActive ? 'z-[2000] ring-2 ring-blue-100 dark:ring-blue-900/30 border-blue-200 dark:border-blue-800 shadow-xl' : 'z-10'}`}>
 
-      {/* ICONO IZQUIERDO */}
-      <div className="mt-1 flex-shrink-0 text-slate-400 dark:text-slate-400">{renderIcon()}</div>
+      {/* ICONO IZQUIERDO - DRAG HANDLE */}
+      <div
+        className="mt-1 flex-shrink-0 text-slate-400 dark:text-slate-400 cursor-grab active:cursor-grabbing"
+        draggable={true}
+        onDragStart={onDragStart}
+        title="Drag to move"
+      >
+        {renderIcon()}
+      </div>
 
       {/* CONTENIDO */}
       <div className="flex-1 min-w-0 pr-8">
 
         {/* LABEL + STATUS */}
-        <div className="flex items-start justify-between gap-2 mb-1 relative z-30">
+        <div
+          data-text-area="true"
+          className="flex items-start justify-between gap-2 mb-1 relative z-30 select-text cursor-text"
+          onMouseDown={(e) => e.stopPropagation()}
+          onDragStart={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          draggable={false}
+        >
           <div className="flex-1 min-w-0">
             {onUpdateLabel && canEdit ? (
               <EditableText
@@ -333,7 +366,14 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
         </div>
 
         {/* DESCRIPTION */}
-        <div className="relative z-20">
+        <div
+          data-text-area="true"
+          className="relative z-20 select-text cursor-text"
+          onMouseDown={(e) => e.stopPropagation()}
+          onDragStart={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          draggable={false}
+        >
           <div className="flex items-center justify-between gap-1 group/desc">
             <div className="flex-1">
               {onUpdateDescription && canEdit ? (
@@ -371,18 +411,29 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
         </div>
 
         {/* RESPONSABLE Y FECHA */}
-        <div className="mt-2 flex items-center justify-between gap-2 relative z-10">
+        <div className="mt-2 flex items-center justify-between gap-2 relative z-30">
           {/* Responsable */}
           {/* RESPONSIBLE FIELD REMOVED PER USER REQUEST */}
 
           {/* Fecha */}
           {onUpdateDate && canEdit && (
-            <div className="relative inline-block flex-shrink-0">
+            <div
+              className="relative inline-block flex-shrink-0"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
               <input
                 type="date"
                 value={date || ''}
                 onChange={(e) => onUpdateDate(e.target.value)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-[40]"
+                onClick={(e) => {
+                  try {
+                    (e.currentTarget as any).showPicker();
+                  } catch (err) {
+                    // Fallback for older browsers
+                  }
+                }}
               />
               <div className="text-[10px] font-medium text-slate-600 dark:text-slate-300 px-2 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 flex items-center gap-1">
                 <Clock size={10} className="text-slate-400 dark:text-slate-400" />

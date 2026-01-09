@@ -213,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* VERSIÓN */}
       <div className="py-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center">
         <span className="text-[10px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-widest leading-none">
-          v1.1.0
+          v1.2.0
         </span>
       </div>
     </div>
