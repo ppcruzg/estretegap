@@ -564,6 +564,7 @@ const PageView: React.FC = () => {
                   activeColorPicker={null}
                   setActiveColorPicker={() => { }}
                   currentPageTitle={currentPage.pageConfig.title}
+                  pageId={currentPage.id}
                   canEdit={canEdit}
                 />
               </div>

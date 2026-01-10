@@ -33,6 +33,12 @@ export interface DocumentationLink {
 }
 
 // New types for the dynamic dashboard
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface DashboardItem {
   id: string;
   label: string;
@@ -40,6 +46,7 @@ export interface DashboardItem {
   status?: ProjectStatus;
   hasIcon?: 'dollar' | 'bulb' | 'refresh';
   description?: string;
+  checklist?: ChecklistItem[];
   isExternalLink?: boolean;
   date?: string; // ISO date string
   responsible?: string;

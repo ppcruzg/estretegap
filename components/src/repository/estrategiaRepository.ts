@@ -285,7 +285,8 @@ export async function createItem(columnId: string, userId: string) {
       label: "Nuevo Item",
       type: "leaf",
       position: next,
-      status: statusRow ? "pendiente" : null, // 👈 SOLO si existe
+      status: statusRow ? "pendiente" : null,
+      checklist: [],
     })
     .select()
     .single();
@@ -646,6 +647,10 @@ export async function getPageChangeHistory(
 
   if (filters?.userId) {
     query = query.eq("changed_by", filters.userId);
+  }
+
+  if (filters?.entityId) {
+    query = query.eq("entity_id", filters.entityId);
   }
 
   if (filters?.limit) {

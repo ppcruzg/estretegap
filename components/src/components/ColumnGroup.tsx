@@ -35,6 +35,7 @@ interface ColumnGroupProps {
   activeColorPicker: string | null;
   setActiveColorPicker: (val: string | null) => void;
   currentPageTitle?: string;
+  pageId?: string;
   canEdit?: boolean;
 }
 
@@ -52,6 +53,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
   onUpdateStatuses,
   onUpdateColumnStatuses,
   currentPageTitle,
+  pageId,
   canEdit = false,
 }) => {
   const { t } = useTranslation();
@@ -477,6 +479,11 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                       onUpdateDate={(val) => onUpdateItem(col.id, item.id, { date: val })}
                       onUpdateStatus={(newStatus) =>
                         onUpdateItem(col.id, item.id, { status: newStatus })
+                      }
+                      pageId={pageId}
+                      checklist={item.checklist}
+                      onUpdateChecklist={(val) =>
+                        onUpdateItem(col.id, item.id, { checklist: val })
                       }
                       responsible={item.responsible}
                       onUpdateResponsible={(val) => onUpdateItem(col.id, item.id, { responsible: val })}

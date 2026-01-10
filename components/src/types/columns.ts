@@ -1,6 +1,10 @@
-// =========================================
 // TYPES PARA DASHBOARD / ESTRATEGA
 // =========================================
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
 
 // -----------------------------------------
 // COLORES TAILWIND VALIDOS PARA STATUS
@@ -39,6 +43,7 @@ export interface DashboardItem {
   isExternalLink?: boolean;
   position?: number;
   responsible?: string;
+  checklist?: ChecklistItem[];
 }
 
 // -----------------------------------------

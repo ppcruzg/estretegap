@@ -34,6 +34,7 @@ export interface ChangeHistoryFilters {
     startDate?: Date;
     endDate?: Date;
     userId?: string;
+    entityId?: string;
     limit?: number;
     offset?: number;
 }
