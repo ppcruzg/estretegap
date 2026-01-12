@@ -366,7 +366,7 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
   const isActive = isEditing || showStatusMenu || showHistory;
 
   return (
-    <div className={`group flex items-start gap-1.5 p-1.5 pt-3 rounded-xl hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-all duration-200 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-md relative bg-white dark:bg-slate-900 ${showHistory ? 'overflow-visible' : 'overflow-hidden'} ${isActive ? 'z-[2000] ring-2 ring-blue-100 dark:ring-blue-900/30 border-blue-200 dark:border-blue-800 shadow-xl' : 'z-10'}`}>
+    <div className={`group flex items-start gap-1.5 p-1.5 pt-3 rounded-xl hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-all duration-200 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-md relative bg-white dark:bg-slate-900 ${showHistory || showStatusMenu ? 'overflow-visible' : 'overflow-hidden'} ${isActive ? 'z-[2000] ring-2 ring-blue-100 dark:ring-blue-900/30 border-blue-200 dark:border-blue-800 shadow-xl' : 'z-10'}`}>
 
       {/* Barra de Progreso Superior */}
       {checklist && checklist.length > 0 && (
@@ -394,7 +394,7 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
         {/* LABEL + STATUS */}
         <div
           data-text-area="true"
-          className="flex items-start justify-between gap-2 mb-1 relative z-30 select-text cursor-text"
+          className={`flex items-start justify-between gap-2 mb-1 relative select-text cursor-text ${showStatusMenu ? 'z-[50]' : 'z-30'}`}
           onMouseDown={(e) => e.stopPropagation()}
           onDragStart={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
