@@ -6,6 +6,8 @@ import FooterLinks from "../FooterLinks";
 import PagePermissionsModal from "./PagePermissionsModal";
 import ChangeHistoryPanel from "../ChangeHistoryPanel";
 import RoadmapPanel from "../RoadmapPanel";
+import MindMapPanel from "../MindMapPanel";
+import GanttPanel from "../GanttPanel";
 import SystemConfigPanel from "../SystemConfigPanel";
 import { useCompany } from "../../contexts/CompanyContext";
 import { useAppContext } from "../../contexts/AppContext";
@@ -48,6 +50,8 @@ const PageView: React.FC = () => {
   const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
+  const [showMindMap, setShowMindMap] = useState(false);
+  const [showGantt, setShowGantt] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
   // ======================================================
@@ -540,6 +544,8 @@ const PageView: React.FC = () => {
             onManagePermissions={() => setIsPermissionsModalOpen(true)}
             onShowHistory={() => setShowHistory(true)}
             onShowRoadmap={() => setShowRoadmap(true)}
+            onShowMindMap={() => setShowMindMap(true)}
+            onShowGantt={() => setShowGantt(true)}
             onShowConfig={() => setShowConfig(true)}
           />
 
@@ -659,6 +665,21 @@ const PageView: React.FC = () => {
           pageId={currentPage.id}
           pageTitle={currentPage.pageConfig.title}
           onClose={() => setShowRoadmap(false)}
+        />
+      )}
+
+      {showMindMap && currentPage && activeCompanyId && (
+        <MindMapPanel
+          pageId={currentPage.id}
+          pageData={currentPage}
+          onClose={() => setShowMindMap(false)}
+        />
+      )}
+
+      {showGantt && currentPage && activeCompanyId && (
+        <GanttPanel
+          pageData={currentPage}
+          onClose={() => setShowGantt(false)}
         />
       )}
 
