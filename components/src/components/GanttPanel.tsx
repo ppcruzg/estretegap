@@ -40,8 +40,16 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
     const { t } = useTranslation();
     const [viewDate, setViewDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<ViewMode>('month');
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const timelineRef = useRef<HTMLDivElement>(null);
+    const sidebarRef = useRef<HTMLDivElement>(null);
     const hasAutoCentered = useRef(false);
+
+    // Sync scroll helper
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>, targetRef: React.RefObject<HTMLDivElement>) => {
+        if (targetRef.current && targetRef.current.scrollTop !== e.currentTarget.scrollTop) {
+            targetRef.current.scrollTop = e.currentTarget.scrollTop;
+        }
+    };
 
     // Calculate timeline structure based on mode
     const timelineData = useMemo(() => {
@@ -136,7 +144,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
             const earliest = new Date(Math.min(...parsedDates.map(d => d.getTime())));
             setViewDate(earliest);
             // Reset horizontal scroll
-            if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+            if (timelineRef.current) timelineRef.current.scrollLeft = 0;
         }
     };
 
@@ -171,7 +179,32 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                 const completedTasks = (item.checklist || []).filter(c => c.completed).length;
                 const totalTasks = (item.checklist || []).length;
                 const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-                result.push({ ...item, type: 'item', color: col.color, progress });
+
+                // Find status category
+                const statusCat = (col.statusCategories || []).find(s => s.id === item.status);
+                const sLabel = statusCat?.label || item.status || '';
+                let sColor = statusCat?.color || 'slate';
+
+                // INTELLIGENT COLOR MAPPING BASED ON LABEL
+                const lowerLabel = sLabel.toLowerCase();
+                if (lowerLabel.includes('completad') || progress === 100) {
+                    sColor = 'emerald';
+                } else if (lowerLabel.includes('proceso') || lowerLabel.includes('progress') || lowerLabel.includes('ejecucion')) {
+                    sColor = 'blue';
+                } else if (lowerLabel.includes('pendiente') || lowerLabel.includes('pending')) {
+                    sColor = 'amber';
+                } else if (lowerLabel.includes('atrasado') || lowerLabel.includes('vencido') || lowerLabel.includes('overdue') || lowerLabel.includes('bloqueado')) {
+                    sColor = 'rose';
+                }
+
+                result.push({
+                    ...item,
+                    type: 'item',
+                    color: col.color,
+                    progress,
+                    statusLabel: sLabel,
+                    statusColor: sColor
+                });
             });
         });
         return result;
@@ -185,6 +218,19 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
             return differenceInCalendarWeeks(itemDate, timelineData.start, { weekStartsOn: 1 });
         } else {
             return differenceInCalendarMonths(itemDate, timelineData.start);
+        }
+    };
+
+    const getStatusColorClasses = (color?: string) => {
+        switch (color) {
+            case 'emerald': return 'bg-emerald-500/20 text-emerald-700 border-emerald-300/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-800/50';
+            case 'blue': return 'bg-blue-500/20 text-blue-700 border-blue-300/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-800/50';
+            case 'rose': return 'bg-rose-500/20 text-rose-700 border-rose-300/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-800/50';
+            case 'amber': return 'bg-amber-500/20 text-amber-700 border-amber-300/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-800/50';
+            case 'purple': return 'bg-purple-500/20 text-purple-700 border-purple-300/50 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-800/50';
+            case 'indigo': return 'bg-indigo-500/20 text-indigo-700 border-indigo-300/50 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-800/50';
+            case 'cyan': return 'bg-cyan-500/20 text-cyan-700 border-cyan-300/50 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-800/50';
+            default: return 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200/50 dark:border-slate-700/50';
         }
     };
 
@@ -259,7 +305,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                 <div className="flex-1 overflow-hidden flex bg-white dark:bg-slate-950">
 
                     {/* Sidebar */}
-                    <div className="w-[320px] border-r border-slate-100 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-950 z-20 shadow-[20px_0_40px_rgba(0,0,0,0.02)]">
+                    <div className="w-[240px] border-r border-slate-100 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-950 z-20 shadow-[20px_0_40px_rgba(0,0,0,0.02)]">
                         <div className="h-[72px] border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-8">
                             <div className="flex items-center">
                                 <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-400 mr-3">
@@ -281,11 +327,15 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                             })()}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto no-scrollbar py-4">
+                        <div
+                            className="flex-1 overflow-y-auto no-scrollbar py-4"
+                            ref={sidebarRef}
+                            onScroll={(e) => handleScroll(e, timelineRef)}
+                        >
                             {flatItems.map((item, idx) => (
                                 <div
                                     key={item.id + idx}
-                                    className={`h-10 flex items-center px-8 border-b border-transparent transition-all
+                                    className={`h-16 flex items-center px-8 border-b border-transparent transition-all
                                         ${item.type === 'column'
                                             ? 'bg-slate-100 dark:bg-slate-800/80 mt-2 first:mt-0 font-black border-y border-slate-200 dark:border-slate-700'
                                             : 'hover:bg-slate-50/50 dark:hover:bg-slate-900/20'}
@@ -297,17 +347,26 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                             <span className="text-[11px] uppercase tracking-widest text-slate-400 truncate">{item.title}</span>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col min-w-0">
-                                            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate leading-tight">{item.label}</span>
+                                        <div className="flex flex-col min-w-0 flex-1">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300 truncate leading-tight flex-shrink-0">{item.label}</span>
+                                                {item.status && (
+                                                    <div
+                                                        className={`w-2 h-2 rounded-full shrink-0 ${item.statusColor === 'emerald' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' :
+                                                            item.statusColor === 'rose' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' :
+                                                                item.statusColor === 'blue' ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]' :
+                                                                    item.statusColor === 'amber' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]' :
+                                                                        item.statusColor === 'purple' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.4)]' :
+                                                                            item.statusColor === 'indigo' ? 'bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.4)]' :
+                                                                                item.statusColor === 'cyan' ? 'bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]' :
+                                                                                    'bg-slate-400'
+                                                            }`}
+                                                    />
+                                                )}
+                                            </div>
                                             {item.date && (
                                                 <span className="text-[9px] text-slate-400 font-medium tabular-nums mt-0.5">
                                                     📅 {String(item.date).substring(0, 10)}
-                                                </span>
-                                            )}
-                                            {/* Debug only if it's the very first item */}
-                                            {idx === 1 && (
-                                                <span className="hidden group-hover:block absolute left-[320px] bg-black text-white p-2 z-[5000] text-[8px] max-w-xs break-all">
-                                                    DEBUG: {JSON.stringify(item)}
                                                 </span>
                                             )}
                                         </div>
@@ -364,9 +423,10 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                         {/* Grid Rows */}
                         <div
                             className="flex-1 overflow-auto bg-white dark:bg-slate-950 relative"
-                            ref={scrollRef}
+                            ref={timelineRef}
                             onScroll={(e) => {
-                                // Sync header scroll (optional enhancement)
+                                handleScroll(e, sidebarRef);
+                                // Sync header scroll
                                 const header = e.currentTarget.parentElement?.querySelector('.overflow-x-auto');
                                 if (header) header.scrollLeft = e.currentTarget.scrollLeft;
                             }}
@@ -394,7 +454,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                 {/* Data Rows Container */}
                                 <div className="relative pt-4">
                                     {flatItems.map((item, idx) => (
-                                        <div key={item.id + idx + '-row'} className={`h-10 flex relative border-b border-slate-50/50 dark:border-slate-900/20 group transition-colors ${item.type === 'column' ? 'bg-slate-100/50 dark:bg-slate-800/40 border-y border-slate-200/50 dark:border-slate-700/50' : ''}`}>
+                                        <div key={item.id + idx + '-row'} className={`h-16 flex relative border-b border-slate-50/50 dark:border-slate-900/20 group transition-colors ${item.type === 'column' ? 'bg-slate-100/50 dark:bg-slate-800/40 border-y border-slate-200/50 dark:border-slate-700/50' : ''}`}>
                                             {item.type === 'item' && (item.date || (item as any).due_date || (item as any).finish_date) && (() => {
                                                 const itemRawDate = item.date || (item as any).due_date || (item as any).finish_date;
                                                 const itemDate = safeParseDate(itemRawDate);
@@ -409,58 +469,81 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                                 const offsetPx = offsetIdx * unitWidth;
 
                                                 return (
-                                                    <div
-                                                        className={`absolute top-[3px] bottom-[3px] rounded-xl border-[3px] z-[100] flex items-center px-4 shadow-2xl transition-all hover:scale-[1.05] hover:z-[200] cursor-pointer overflow-hidden
-                                                            bg-gradient-to-br ${getColorClass(item.color)} text-white border-white/60 dark:border-white/40
-                                                            ${item.status === 'bloqueado' ? 'ring-4 ring-rose-500/30 animate-pulse' : ''}
-                                                            ${item.status === 'completado' ? 'ring-4 ring-emerald-500/30' : ''}
-                                                        `}
-                                                        style={{
-                                                            left: `${offsetPx}px`,
-                                                            width: `${viewMode === 'day' ? '110px' : viewMode === 'week' ? '50px' : '160px'}`,
-                                                            marginLeft: '4px'
-                                                        }}
-                                                    >
-                                                        {/* Background Glass Effect */}
-                                                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+                                                    <>
+                                                        <div
+                                                            className={`absolute top-[10px] bottom-[10px] rounded-xl border-[3px] z-[100] flex items-center px-4 shadow-2xl transition-all hover:scale-[1.05] hover:z-[200] cursor-pointer
+                                                                bg-gradient-to-br ${getColorClass(item.color)} text-white border-white/60 dark:border-white/40
+                                                                ${item.status === 'bloqueado' ? 'ring-4 ring-rose-500/30 animate-pulse' : ''}
+                                                                ${item.status === 'completado' ? 'ring-4 ring-emerald-500/30' : ''}
+                                                            `}
+                                                            style={{
+                                                                left: `${offsetPx}px`,
+                                                                width: `${viewMode === 'day' ? '110px' : viewMode === 'week' ? '50px' : '160px'}`,
+                                                                marginLeft: '4px'
+                                                            }}
+                                                        >
+                                                            {/* Background Glass Effect */}
+                                                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
 
-                                                        <div className="relative flex items-center gap-3 w-full min-w-0">
-                                                            {item.status === 'bloqueado' ? (
-                                                                <div className="w-6 h-6 bg-rose-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg">
-                                                                    <AlertTriangle size={14} className="text-white" />
+                                                            <div className="relative flex items-center gap-3 w-full min-w-0">
+                                                                {item.status === 'bloqueado' ? (
+                                                                    <div className="w-6 h-6 bg-rose-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg">
+                                                                        <AlertTriangle size={14} className="text-white" />
+                                                                    </div>
+                                                                ) : item.status === 'completado' ? (
+                                                                    <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg">
+                                                                        <CheckCircle2 size={14} className="text-white" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="w-6 h-6 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center shrink-0">
+                                                                        <Clock size={14} className="text-white" />
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="flex flex-col min-w-0 leading-none">
+                                                                    <span className="text-[11px] font-black truncate uppercase tracking-tight">{item.label}</span>
+                                                                    <span className="text-[9px] opacity-70 font-bold mt-1 uppercase tracking-widest tabular-nums flex items-center gap-1">
+                                                                        <Calendar size={10} />
+                                                                        {format(itemDate, "d MMM", { locale: es })}
+                                                                    </span>
                                                                 </div>
-                                                            ) : item.status === 'completado' ? (
-                                                                <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg">
-                                                                    <CheckCircle2 size={14} className="text-white" />
-                                                                </div>
-                                                            ) : (
-                                                                <div className="w-6 h-6 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center shrink-0">
-                                                                    <Clock size={14} className="text-white" />
+                                                            </div>
+
+                                                            {/* Extreme Progress Indicator */}
+                                                            {item.progress > 0 && (
+                                                                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/10">
+                                                                    <div
+                                                                        className={`h-full transition-all duration-1000 ease-out ${item.progress === 100 ? 'bg-emerald-400' : 'bg-white/60'}`}
+                                                                        style={{ width: `${item.progress}%` }}
+                                                                    />
                                                                 </div>
                                                             )}
-
-                                                            <div className="flex flex-col min-w-0 leading-none">
-                                                                <span className="text-[11px] font-black truncate uppercase tracking-tight">{item.label}</span>
-                                                                <span className="text-[9px] opacity-70 font-bold mt-1 uppercase tracking-widest tabular-nums flex items-center gap-1">
-                                                                    <Calendar size={10} />
-                                                                    {format(itemDate, "d MMM", { locale: es })}
-                                                                </span>
-                                                            </div>
                                                         </div>
 
-                                                        {/* Extreme Progress Indicator */}
-                                                        {item.progress > 0 && (
-                                                            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/10">
-                                                                <div
-                                                                    className={`h-full transition-all duration-1000 ease-out ${item.progress === 100 ? 'bg-emerald-400' : 'bg-white/60'}`}
-                                                                    style={{ width: `${item.progress}%` }}
-                                                                />
+                                                        {/* Description text next to the bar */}
+                                                        {item.description && (
+                                                            <div
+                                                                className="absolute top-1/2 -translate-y-1/2 ml-4 pointer-events-none z-[50] group-hover:z-[300]"
+                                                                style={{
+                                                                    left: `${offsetPx + (viewMode === 'day' ? 110 : viewMode === 'week' ? 50 : 160) + 8}px`,
+                                                                    maxWidth: '800px'
+                                                                }}
+                                                            >
+                                                                <div className="flex items-center gap-3 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-xl border border-slate-200/50 dark:border-slate-800/50 transition-all group-hover:scale-105">
+                                                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 italic font-bold group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                                                                        {item.description}
+                                                                    </span>
+                                                                    {item.status && (
+                                                                        <span className={`px-2.5 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter shadow-sm border ${getStatusColorClasses(item.statusColor)}`}>
+                                                                            {item.statusLabel}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         )}
-                                                    </div>
+                                                    </>
                                                 );
-                                            })()
-                                            }
+                                            })()}
                                         </div>
                                     ))}
                                 </div>

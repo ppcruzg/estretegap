@@ -3,7 +3,7 @@
 // ============================================================
 
 import jsPDF from 'jspdf';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { RoadmapAnalysis } from '../../../types/roadmapTypes';
 
@@ -82,25 +82,26 @@ export async function exportRoadmapToPDF(
 
             yPosition += 9;
 
-            milestone.items.slice(0, 3).forEach((item) => {
+            milestone.items.slice(0, 5).forEach((item) => {
                 if (yPosition > pageHeight - 15) {
                     pdf.addPage();
                     yPosition = 15;
                 }
-                pdf.setFontSize(7);
-                pdf.text(`- ${item}`, 24, yPosition);
-                yPosition += 3;
+                pdf.setFontSize(7.5);
+                pdf.setTextColor(80, 80, 80);
+                pdf.text(`• ${item}`, 24, yPosition);
+                yPosition += 3.5;
             });
 
-            if (milestone.items.length > 3) {
+            if (milestone.items.length > 5) {
                 pdf.setFontSize(7);
                 pdf.setTextColor(100, 100, 100);
-                pdf.text(`... y ${milestone.items.length - 3} mas`, 24, yPosition);
-                pdf.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-                yPosition += 3;
+                pdf.setFont('helvetica', 'italic');
+                pdf.text(`... y ${milestone.items.length - 5} mas`, 24, yPosition);
+                yPosition += 4;
             }
 
-            yPosition += 2;
+            yPosition += 4;
         });
     } else {
         pdf.setFontSize(9);
@@ -268,26 +269,47 @@ export async function exportRoadmapToPDF(
             pdf.setFont('helvetica', 'normal');
             pdf.text(`Carga: ${resp.workload.toUpperCase()} | Criticas: ${resp.criticalTasks}`, 15, yPosition + 3);
 
-            yPosition += 7;
-            resp.tasks.slice(0, 5).forEach((task) => {
-                if (yPosition > pageHeight - 10) {
+            yPosition += 8;
+            resp.tasks.slice(0, 10).forEach((task) => {
+                if (yPosition > pageHeight - 15) {
                     pdf.addPage();
                     yPosition = 15;
                 }
-                pdf.setFontSize(7);
-                pdf.text(`- ${task}`, 18, yPosition);
-                yPosition += 3;
+
+                // Defensive check: Handle both object and string formats
+                const isObject = typeof task === 'object' && task !== null;
+                const taskTitle = isObject ? (task as any).title : task;
+                const taskIsCritical = isObject ? (task as any).isCritical : false;
+                const taskDateStr = isObject ? (task as any).date : null;
+                const taskStatusText = isObject ? (task as any).status : null;
+
+                pdf.setFontSize(7.5);
+                pdf.setFont('helvetica', taskIsCritical ? 'bold' : 'normal');
+
+                if (taskIsCritical) {
+                    pdf.setTextColor(220, 38, 38); // Stronger Red
+                } else {
+                    pdf.setTextColor(60, 60, 60); // Dark grey for tasks
+                }
+
+                const dateDisplay = taskDateStr ? ` [${format(parseISO(taskDateStr), "d/MM", { locale: es })}]` : '';
+                const statusDisplay = taskStatusText ? ` (${taskStatusText})` : '';
+
+                pdf.text(`• ${taskTitle}${dateDisplay}${statusDisplay}`, 18, yPosition);
+                yPosition += 4;
             });
 
-            if (resp.tasks.length > 5) {
+            pdf.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+
+            if (resp.tasks.length > 10) {
                 pdf.setFontSize(7);
                 pdf.setTextColor(100, 100, 100);
-                pdf.text(`... y ${resp.tasks.length - 5} mas`, 18, yPosition);
-                pdf.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-                yPosition += 3;
+                pdf.setFont('helvetica', 'italic');
+                pdf.text(`... y ${resp.tasks.length - 10} mas`, 18, yPosition);
+                yPosition += 5;
             }
 
-            yPosition += 3;
+            yPosition += 4;
         });
     }
 

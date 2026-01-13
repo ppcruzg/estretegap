@@ -45,7 +45,14 @@ Por favor proporciona un análisis completo en formato JSON con la siguiente est
   "responsibilities": [
     {
       "person": "nombre de la persona",
-      "tasks": ["lista", "de", "tareas"],
+      "tasks": [
+        {
+          "title": "título de la tarea",
+          "date": "YYYY-MM-DD" o null,
+          "isCritical": true | false,
+          "status": "estado de la tarea"
+        }
+      ],
       "workload": "high" | "medium" | "low",
       "criticalTasks": número de tareas críticas
     }
@@ -62,6 +69,7 @@ Por favor proporciona un análisis completo en formato JSON con la siguiente est
     {
       "date": "YYYY-MM-DD",
       "title": "nombre del milestone",
+      "description": "resumen breve de lo que trata este hito",
       "items": ["items incluidos"],
       "status": "completed" | "in-progress" | "pending" | "overdue"
     }
@@ -95,6 +103,11 @@ INSTRUCCIONES IMPORTANTES:
    - Utiliza estas etiquetas prioritariamente para categorizar items, riesgos o recomendaciones.
    - Si un item en el roadmap ya contiene alguna de estas etiquetas en su descripción, dale importancia en el análisis.
    - Si crees que un insight o punto crítico corresponde a una de estas etiquetas, inclúyela en el mensaje correspondiente.
+
+6. ESTRUCTURA DE TAREAS (MUY IMPORTANTE):
+   - El arreglo "tasks" dentro de "responsibilities" debe ser un arreglo de OBJETOS, no de strings.
+   - Cada objeto debe tener la estructura: { "title": "...", "date": "...", "isCritical": ..., "status": "..." }.
+   - NO devuelvas solo una lista de nombres de tareas como strings.
 
 Responde SOLO con el JSON, sin texto adicional.`;
 

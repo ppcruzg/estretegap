@@ -22,7 +22,12 @@ export interface CriticalPoint {
 
 export interface Responsibility {
     person: string;
-    tasks: string[];
+    tasks: {
+        title: string;
+        date?: string;
+        isCritical: boolean;
+        status?: string;
+    }[];
     workload: 'high' | 'medium' | 'low';
     criticalTasks: number;
 }
@@ -37,6 +42,7 @@ export interface Insight {
 export interface Milestone {
     date: string;
     title: string;
+    description?: string;
     items: string[];
     status: 'completed' | 'in-progress' | 'pending' | 'overdue';
 }
