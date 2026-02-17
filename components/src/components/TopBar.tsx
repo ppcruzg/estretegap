@@ -22,7 +22,8 @@ import {
   Sun,
   Moon,
   Network,
-  GanttChart
+  GanttChart,
+  Map
 } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -44,6 +45,7 @@ interface TopBarProps {
   onShowMindMap?: () => void;
   onShowGantt?: () => void;
   onShowConfig?: () => void;
+  onShowExecutiveTimeline?: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -63,7 +65,8 @@ const TopBar: React.FC<TopBarProps> = ({
   onShowRoadmap,
   onShowMindMap,
   onShowGantt,
-  onShowConfig
+  onShowConfig,
+  onShowExecutiveTimeline
 }) => {
   const { companies, activeCompanyId, setActiveCompanyId } = useCompany();
   const { profile, isSuperAdmin } = useAuth();
@@ -253,6 +256,16 @@ const TopBar: React.FC<TopBarProps> = ({
             </button>
           )}
 
+          {currentPage && onShowExecutiveTimeline && (
+            <button
+              onClick={onShowExecutiveTimeline}
+              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
+              title="Roadmap Ejecutivo"
+            >
+              <Map size={16} />
+            </button>
+          )}
+
           {currentPage && onShowMindMap && (
             <button
               onClick={onShowMindMap}
@@ -341,7 +354,7 @@ const TopBar: React.FC<TopBarProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

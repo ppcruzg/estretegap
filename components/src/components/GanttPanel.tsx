@@ -57,8 +57,8 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
         const now = startOfDay(new Date());
 
         if (viewMode === 'day') {
-            start = startOfDay(addDays(viewDate, -7));
-            end = startOfDay(addDays(viewDate, 7));
+            start = startOfDay(addDays(viewDate, -3));
+            end = startOfDay(addDays(viewDate, 14));
             units = eachDayOfInterval({ start, end }).map(d => ({
                 date: d,
                 label: format(d, "eee", { locale: es }),
@@ -103,13 +103,13 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
     };
 
     const handlePrev = () => {
-        if (viewMode === 'day') setViewDate(prev => addDays(prev, -14));
+        if (viewMode === 'day') setViewDate(prev => addDays(prev, -7));
         else if (viewMode === 'week') setViewDate(prev => addMonths(prev, -12));
         else setViewDate(prev => addMonths(prev, -1));
     };
 
     const handleNext = () => {
-        if (viewMode === 'day') setViewDate(prev => addDays(prev, 14));
+        if (viewMode === 'day') setViewDate(prev => addDays(prev, 7));
         else if (viewMode === 'week') setViewDate(prev => addMonths(prev, 12));
         else setViewDate(prev => addMonths(prev, 1));
     };

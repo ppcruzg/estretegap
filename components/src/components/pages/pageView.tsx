@@ -9,6 +9,8 @@ import RoadmapPanel from "../RoadmapPanel";
 import MindMapPanel from "../MindMapPanel";
 import GanttPanel from "../GanttPanel";
 import SystemConfigPanel from "../SystemConfigPanel";
+import ExecutiveTimeline from "../StrategicRoadmap";
+import { X } from "lucide-react";
 import { useCompany } from "../../contexts/CompanyContext";
 import { useAppContext } from "../../contexts/AppContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -18,7 +20,7 @@ import * as Repo from "../../repository/estrategiaRepository";
 import { PageSummary, PageData } from "../../types/columns";
 import { PageConfig } from "../../../../types";
 import { supabase } from "../../lib/supabaseClient";
-import { Building2, LogIn, Loader2 } from "lucide-react";
+import { Building2, LogIn, Loader2, Map } from "lucide-react";
 import AuthContainer from "../AuthContainer";
 import { getDefaultStatuses } from "../../helpers/statuses";
 import { initializeOpenAI, isOpenAIInitialized } from "../../services/aiService";
@@ -53,6 +55,7 @@ const PageView: React.FC = () => {
   const [showMindMap, setShowMindMap] = useState(false);
   const [showGantt, setShowGantt] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [showExecutiveTimeline, setShowExecutiveTimeline] = useState(false);
 
   // ======================================================
   // CARGAR LISTA DE PÁGINAS
@@ -463,6 +466,10 @@ const PageView: React.FC = () => {
   // ======================================================
   // RENDERIZADO
   // ======================================================
+  if (!currentUserId && !loadingAuth) {
+    return <AuthContainer />;
+  }
+
   if (loadingAuth || loadingCompanies || isRoleLoading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6 transition-colors">
@@ -472,10 +479,6 @@ const PageView: React.FC = () => {
         </div>
       </div>
     );
-  }
-
-  if (!currentUserId) {
-    return <AuthContainer />;
   }
 
   if (!activeCompanyId) {
@@ -547,6 +550,7 @@ const PageView: React.FC = () => {
             onShowMindMap={() => setShowMindMap(true)}
             onShowGantt={() => setShowGantt(true)}
             onShowConfig={() => setShowConfig(true)}
+            onShowExecutiveTimeline={() => setShowExecutiveTimeline(true)}
           />
 
           {isLoading || !currentPage ? (
@@ -687,6 +691,44 @@ const PageView: React.FC = () => {
         <SystemConfigPanel
           onClose={() => setShowConfig(false)}
         />
+      )}
+
+      {showExecutiveTimeline && currentPage && (
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-3xl z-[2000] flex flex-col p-2 md:p-4 animate-in fade-in duration-500">
+          {/* Header remains compact to give more room to the roadmap */}
+          <div className="w-full max-w-[95%] mx-auto flex justify-between items-center py-4 px-6 mb-2 animate-in slide-in-from-top-4 duration-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                <Map size={20} />
+              </div>
+              <div>
+                <h2 className="text-white font-black text-xl tracking-tight">Estratega Roadmap</h2>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{currentPage.pageConfig.title}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowExecutiveTimeline(false)}
+              className="group flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-rose-600 text-white rounded-full transition-all duration-300 border border-white/10 hover:border-rose-500 backdrop-blur-md font-bold text-sm shadow-xl"
+            >
+              <X size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+              <span>Cerrar</span>
+            </button>
+          </div>
+
+          <div className="flex-1 w-full max-w-[98%] mx-auto overflow-y-auto rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 scrollbar-none border border-white/10 bg-white dark:bg-slate-950">
+            <ExecutiveTimeline pageData={currentPage} />
+
+            <div className="px-8 pb-20 pt-10 flex justify-center bg-white dark:bg-slate-950">
+              <button
+                onClick={() => setShowExecutiveTimeline(false)}
+                className="px-12 py-4 bg-slate-900 dark:bg-slate-100 dark:text-slate-900 text-white font-black rounded-2xl transition-all active:scale-95 border border-slate-700 dark:border-slate-300 shadow-2xl"
+              >
+                Finalizar Revisión Estratégica
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -36,50 +36,65 @@ export const AuthSProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const loadAuth = async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      const user = auth?.user;
+      // Timeout de seguridad de 7 segundos
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout de conexión con Supabase")), 7000)
+      );
 
-      if (!user) {
-        setState((s) => ({ ...s, loading: false }));
-        return;
-      }
+      try {
+        const { data: auth } = await Promise.race([
+          supabase.auth.getUser(),
+          timeoutPromise
+        ]) as any;
 
-      // profile
-      let { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
+        const user = auth?.user;
 
-      // Fallback: If profile doesn't exist, create it on first login
-      if (!profile) {
-        const { data: newProfile, error: insertError } = await supabase
+        if (!user) {
+          setState((s) => ({ ...s, loading: false, isRoleLoading: false }));
+          return;
+        }
+
+        // profile
+        let { data: profile } = await supabase
           .from("profiles")
-          .insert({
-            user_id: user.id,
-            email: user.email,
-            name: user.user_metadata?.full_name || null,
-            is_admin: false
-          })
-          .select()
+          .select("*")
+          .eq("user_id", user.id)
           .single();
 
-        if (!insertError) {
-          profile = newProfile;
-        } else {
-          console.error("Error creating profile on login:", insertError);
-        }
-      }
+        // Fallback: If profile doesn't exist, create it on first login
+        if (!profile) {
+          console.log("[AuthContext] Profile not found, creating one for user:", user.id);
+          const { data: newProfile, error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              user_id: user.id,
+              email: user.email,
+              name: user.user_metadata?.full_name || null,
+              is_admin: false
+            })
+            .select()
+            .single();
 
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        profile,
-        isSuperAdmin: profile?.is_admin === true,
-        companyId: null,
-        companyRole: null,
-        isRoleLoading: true, // Still loading because CompanyContext needs to sync
-      }));
+          if (!insertError) {
+            profile = newProfile;
+          } else {
+            console.error("Error creating profile on login:", insertError);
+          }
+        }
+
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          profile,
+          isSuperAdmin: profile?.is_admin === true,
+          companyId: null,
+          companyRole: null,
+          isRoleLoading: true, // Still loading because CompanyContext needs to sync
+        }));
+      } catch (error) {
+        console.error("[AuthContext] Error en loadAuth o Timeout:", error);
+        setState(prev => ({ ...prev, loading: false, isRoleLoading: false }));
+      }
     };
 
     loadAuth();

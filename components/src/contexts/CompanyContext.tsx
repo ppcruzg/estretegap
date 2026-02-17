@@ -45,24 +45,39 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function loadCompanies() {
-      if (!sessionUserId) {
-        setCompanies([]);
-        setLoadingCompanies(false);
+      // Timeout de seguridad de 8 segundos para la carga de empresas
+      const timeoutToken = setTimeout(() => {
+        if (loadingCompanies) {
+          console.warn("[CompanyContext] Timeout alcanzado cargando empresas");
+          setLoadingCompanies(false);
+          setCompanyData(null, null);
+        }
+      }, 8000);
+
+      try {
+        if (!sessionUserId) {
+          setCompanies([]);
+          setLoadingCompanies(false);
+          setCompanyData(null, null);
+          return;
+        }
+
+        setLoadingCompanies(true);
+
+        // Cargar empresas del usuario
+        const list = await getCompaniesForUser();
+        setCompanies(list);
+
+        // Si aún no hay empresa activa, seleccionar la primera
+        const initialId = activeCompanyId ?? list[0]?.id ?? null;
+        setActiveCompanyId(initialId);
+      } catch (error) {
+        console.error("[CompanyContext] Error loading companies:", error);
         setCompanyData(null, null);
-        return;
+      } finally {
+        clearTimeout(timeoutToken);
+        setLoadingCompanies(false);
       }
-
-      setLoadingCompanies(true);
-
-      // Cargar empresas del usuario
-      const list = await getCompaniesForUser();
-      setCompanies(list);
-
-      // Si aún no hay empresa activa, seleccionar la primera
-      const initialId = activeCompanyId ?? list[0]?.id ?? null;
-      setActiveCompanyId(initialId);
-
-      setLoadingCompanies(false);
     }
 
     loadCompanies();
@@ -71,29 +86,34 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
   // Sync role whenever activeCompanyId or profile changes
   useEffect(() => {
     async function syncRole() {
-      if (!sessionUserId || !activeCompanyId || !profile?.id) {
-        console.log("[CompanyContext] Missing data for sync:", { sessionUserId, activeCompanyId, profileId: profile?.id });
+      try {
+        if (!sessionUserId || !activeCompanyId || !profile?.id) {
+          console.log("[CompanyContext] Missing data for sync:", { sessionUserId, activeCompanyId, profileId: profile?.id });
+          setCompanyData(activeCompanyId, null);
+          return;
+        }
+
+        console.log("[CompanyContext] Syncing role for:", { userId: profile.id, companyId: activeCompanyId });
+
+        const { data: companyUsers, error } = await supabase
+          .from("company_users")
+          .select("role")
+          .eq("user_id", profile.id)
+          .eq("company_id", activeCompanyId);
+
+        if (error) {
+          console.error("[CompanyContext] Error syncing role:", error);
+          setCompanyData(activeCompanyId, null);
+          return;
+        }
+
+        const role = companyUsers && companyUsers.length > 0 ? companyUsers[0].role : null;
+        console.log("[CompanyContext] Role found:", role);
+        setCompanyData(activeCompanyId, role);
+      } catch (error) {
+        console.error("[CompanyContext] Exception in syncRole:", error);
         setCompanyData(activeCompanyId, null);
-        return;
       }
-
-      console.log("[CompanyContext] Syncing role for:", { userId: profile.id, companyId: activeCompanyId });
-
-      const { data: companyUsers, error } = await supabase
-        .from("company_users")
-        .select("role")
-        .eq("user_id", profile.id)
-        .eq("company_id", activeCompanyId);
-
-      if (error) {
-        console.error("[CompanyContext] Error syncing role:", error);
-        setCompanyData(activeCompanyId, null);
-        return;
-      }
-
-      const role = companyUsers && companyUsers.length > 0 ? companyUsers[0].role : null;
-      console.log("[CompanyContext] Role found:", role);
-      setCompanyData(activeCompanyId, role);
     }
 
     syncRole();
