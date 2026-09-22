@@ -119,6 +119,7 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
   const [historyItems, setHistoryItems] = useState<ChangeHistoryEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const { t, language } = useTranslation();
+  const dateInputRef = React.useRef<HTMLInputElement>(null);
 
   const loadHistory = async () => {
     if (!pageId || !itemId) return;
@@ -606,17 +607,26 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({
 
               <div className="relative flex-shrink-0">
                 <input
+                  ref={dateInputRef}
                   type="date"
                   value={date || ''}
                   onChange={(e) => onUpdateDate(e.target.value)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-[40]"
-                  onClick={(e) => {
-                    try {
-                      (e.currentTarget as any).showPicker();
-                    } catch (err) { }
-                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
+                  tabIndex={-1}
                 />
-                <div className="text-[9px] font-bold text-slate-600 dark:text-slate-300 px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center gap-1 rounded-md">
+                <div
+                  className="text-[9px] font-bold text-slate-600 dark:text-slate-300 px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center gap-1 rounded-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (dateInputRef.current) {
+                      try {
+                        dateInputRef.current.showPicker();
+                      } catch {
+                        dateInputRef.current.click();
+                      }
+                    }
+                  }}
+                >
                   <Clock size={9} className="text-slate-400" />
                   {date ? formatDate(date) : t('addDate')}
                 </div>
