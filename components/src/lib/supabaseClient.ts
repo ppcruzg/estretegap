@@ -4,12 +4,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-// 🔥 DEBUG opcional (puedes quitarlo si quieres)
-if (import.meta.env.DEV) {
-  console.log("ENV URL:", import.meta.env.VITE_SUPABASE_URL);
-  console.log("ENV KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY);
-}
-
 // ----------------------------------------
 // ENV VARS
 // ----------------------------------------

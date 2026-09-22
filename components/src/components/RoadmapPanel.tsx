@@ -21,7 +21,7 @@ import {
 import { format, parseISO, isAfter, isBefore, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import * as Repo from "../repository/estrategiaRepository";
-import { analyzeRoadmapWithAI, initializeOpenAI, isOpenAIInitialized } from "../services/aiService";
+import { analyzeRoadmapWithAI } from "../services/aiService";
 import { downloadRoadmapPDF } from "../services/pdfExportService";
 import EmailRoadmapModal from "./EmailRoadmapModal";
 import type { RoadmapAnalysis, CriticalPoint, Insight } from "../../../types/roadmapTypes";
@@ -55,20 +55,6 @@ const RoadmapPanel: React.FC<RoadmapPanelProps> = ({
         setError(null);
 
         try {
-            // 1. Cargar configuración de OpenAI
-            const apiKey = await Repo.getSystemConfig("openai_api_key");
-
-            if (!apiKey) {
-                setError("API key de OpenAI no configurada. Contacte al administrador.");
-                setLoading(false);
-                return;
-            }
-
-            // 2. Inicializar OpenAI
-            if (!isOpenAIInitialized()) {
-                initializeOpenAI(apiKey);
-            }
-
             // 3. Obtener datos del roadmap
             const roadmapData = await Repo.getRoadmapData(pageId);
 

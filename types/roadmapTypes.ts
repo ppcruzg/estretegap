@@ -64,7 +64,6 @@ export interface RoadmapAnalysis {
 }
 
 export interface SystemConfig {
-    openai_api_key?: string;
     openai_model?: string;
     ai_report_prompt?: string;
     roadmap_cache_ttl?: string;

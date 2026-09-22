@@ -23,7 +23,6 @@ import { supabase } from "../../lib/supabaseClient";
 import { Building2, LogIn, Loader2, Map } from "lucide-react";
 import AuthContainer from "../AuthContainer";
 import { getDefaultStatuses } from "../../helpers/statuses";
-import { initializeOpenAI, isOpenAIInitialized } from "../../services/aiService";
 import { useTranslation } from "../../hooks/useTranslation";
 
 
@@ -63,19 +62,6 @@ const PageView: React.FC = () => {
   useEffect(() => {
     if (!activeCompanyId) return;
     loadPages(activeCompanyId, true); // Initial load sets first page
-
-    // Pre-inicializar OpenAI para los asistentes de las tarjetas
-    const preInitAI = async () => {
-      try {
-        if (!isOpenAIInitialized()) {
-          const apiKey = await Repo.getSystemConfig("openai_api_key");
-          if (apiKey) initializeOpenAI(apiKey);
-        }
-      } catch (e) {
-        console.warn("Soft-error initializing AI:", e);
-      }
-    };
-    preInitAI();
   }, [activeCompanyId]);
 
   const loadPages = async (companyId: string, shouldSetInitial = false) => {

@@ -2,13 +2,66 @@
 // SERVICIO DE IA PARA ANÁLISIS DE ROADMAP
 // ============================================================
 
-import OpenAI from 'openai';
 import type { RoadmapItem, RoadmapAnalysis } from '../../../types/roadmapTypes';
 import type { StatusCategory } from '../../../types';
 import type { ChangeHistoryEntry } from '../../../types/changeHistory';
 import * as Repo from '../repository/estrategiaRepository';
+import { supabase } from '../lib/supabaseClient';
 
-let openaiInstance: OpenAI | null = null;
+// ------------------------------------------------------------
+// AI PROXY
+// All OpenAI calls go through the `ai-proxy` Supabase Edge Function.
+// The OpenAI API key lives only as a function secret (OPENAI_API_KEY)
+// and is never read or exposed in the browser.
+// ------------------------------------------------------------
+
+type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+
+interface AIProxyRequest {
+    messages: ChatMessage[];
+    model?: 'gpt-4o' | 'gpt-4o-mini';
+    temperature?: number;
+    max_tokens?: number;
+    response_format?: { type: 'json_object' | 'text' };
+}
+
+interface AIProxyResponse {
+    choices?: { message?: { content?: string | null } }[];
+    error?: { code?: string; message?: string };
+}
+
+/**
+ * Sends a chat completion request through the ai-proxy Edge Function
+ * and returns the assistant message content.
+ */
+async function callAIProxy(body: AIProxyRequest): Promise<string> {
+    const { data, error } = await supabase.functions.invoke<AIProxyResponse>('ai-proxy', { body });
+
+    if (error) {
+        let code: string | undefined;
+        let message: string = error.message;
+        // FunctionsHttpError exposes the raw Response in `context`
+        const ctx = (error as any).context;
+        if (ctx && typeof ctx.json === 'function') {
+            try {
+                const payload = await ctx.json();
+                code = payload?.error?.code;
+                message = payload?.error?.message || message;
+            } catch {
+                // Ignore body parse errors
+            }
+        }
+        const err: any = new Error(message);
+        err.code = code;
+        throw err;
+    }
+
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) {
+        throw new Error('No se recibió respuesta de OpenAI');
+    }
+    return content;
+}
 
 export const DEFAULT_AI_PROMPT = `Eres un experto en gestión de proyectos y análisis de roadmaps. Analiza el siguiente proyecto:
 
@@ -112,40 +165,6 @@ INSTRUCCIONES IMPORTANTES:
 Responde SOLO con el JSON, sin texto adicional.`;
 
 /**
- * Inicializa el cliente de OpenAI con la API key
- */
-export function initializeOpenAI(apiKey: string) {
-    if (!apiKey) {
-        throw new Error('API key de OpenAI no configurada');
-    }
-
-    openaiInstance = new OpenAI({
-        apiKey,
-        dangerouslyAllowBrowser: true // Solo para desarrollo/demo
-    });
-}
-
-/**
- * Asegura que OpenAI esté inicializado de forma asíncrona
- */
-async function ensureOpenAIInitialized() {
-    if (openaiInstance) return;
-
-    const apiKey = await Repo.getSystemConfig("openai_api_key");
-    if (!apiKey) {
-        throw new Error('OpenAI no configurado. Por favor, agregue su API Key en el panel de Configuración de Sistema.');
-    }
-    initializeOpenAI(apiKey);
-}
-
-/**
- * Verifica si OpenAI está inicializado
- */
-export function isOpenAIInitialized(): boolean {
-    return openaiInstance !== null;
-}
-
-/**
  * Analiza el roadmap usando IA
  */
 export async function analyzeRoadmapWithAI(
@@ -153,7 +172,6 @@ export async function analyzeRoadmapWithAI(
     history: ChangeHistoryEntry[],
     pageTitle: string
 ): Promise<RoadmapAnalysis> {
-    await ensureOpenAIInitialized();
 
     // Obtener etiquetas del proyecto
     const projectTags = await Repo.getProjectTags();
@@ -193,7 +211,7 @@ export async function analyzeRoadmapWithAI(
         .replace(/{{tagsList}}/g, tagsList);
 
     try {
-        const response = await openaiInstance.chat.completions.create({
+        const content = await callAIProxy({
             model: 'gpt-4o',
             messages: [
                 {
@@ -210,11 +228,6 @@ export async function analyzeRoadmapWithAI(
             max_tokens: 4000
         });
 
-        const content = response.choices[0].message.content;
-        if (!content) {
-            throw new Error('No se recibió respuesta de OpenAI');
-        }
-
         const analysis: RoadmapAnalysis = JSON.parse(content);
         analysis.generatedAt = Date.now();
 
@@ -222,8 +235,12 @@ export async function analyzeRoadmapWithAI(
     } catch (error: any) {
         console.error('Error al analizar roadmap con IA:', error);
 
-        if (error.code === 'invalid_api_key') {
-            throw new Error('API key de OpenAI inválida. Verifique la configuración.');
+        if (error.code === 'unauthorized') {
+            throw new Error('Sesión no válida. Inicie sesión nuevamente.');
+        }
+
+        if (error.code === 'not_configured' || error.code === 'invalid_api_key') {
+            throw new Error('El servicio de IA no está configurado correctamente. Contacte al administrador.');
         }
 
         if (error.code === 'insufficient_quota') {
@@ -231,25 +248,6 @@ export async function analyzeRoadmapWithAI(
         }
 
         throw new Error(`Error al analizar roadmap: ${error.message}`);
-    }
-}
-
-/**
- * Valida que una API key de OpenAI sea válida
- */
-export async function validateOpenAIKey(apiKey: string): Promise<boolean> {
-    try {
-        const testClient = new OpenAI({
-            apiKey,
-            dangerouslyAllowBrowser: true
-        });
-
-        // Hacer una llamada mínima para validar
-        await testClient.models.list();
-        return true;
-    } catch (error) {
-        console.error('API key inválida:', error);
-        return false;
     }
 }
 
@@ -267,7 +265,6 @@ export async function extractItemDataFromDescription(
     responsible?: string;
     status?: string;
 }> {
-    await ensureOpenAIInitialized();
 
     const statusesPrompt = availableStatuses.map(s => `- ${s.label} (ID: ${s.status_id})`).join('\n');
 
@@ -301,7 +298,7 @@ Estructura:
 }`;
 
     try {
-        const response = await openaiInstance.chat.completions.create({
+        const content = await callAIProxy({
             model: 'gpt-4o-mini',
             messages: [
                 {
@@ -316,9 +313,6 @@ Estructura:
             response_format: { type: 'json_object' },
             temperature: 0,
         });
-
-        const content = response.choices[0].message.content;
-        if (!content) throw new Error('No se recibió respuesta');
 
         return JSON.parse(content);
     } catch (error) {

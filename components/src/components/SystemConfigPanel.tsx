@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Key, Save, CheckCircle, AlertCircle, Loader2, Hash, Trash2, Plus, FileText, RotateCcw, Bookmark, History } from "lucide-react";
 import * as Repo from "../repository/estrategiaRepository";
-import { validateOpenAIKey, DEFAULT_AI_PROMPT } from "../services/aiService";
+import { DEFAULT_AI_PROMPT } from "../services/aiService";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -12,11 +12,9 @@ interface SystemConfigPanelProps {
 const SystemConfigPanel: React.FC<SystemConfigPanelProps> = ({ onClose }) => {
     const { profile } = useAuth();
     const { t } = useTranslation();
-    const [apiKey, setApiKey] = useState("");
     const [model, setModel] = useState("gpt-4o");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [validating, setValidating] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [tags, setTags] = useState<string[]>([]);
     const [newTag, setNewTag] = useState("");
@@ -34,7 +32,6 @@ const SystemConfigPanel: React.FC<SystemConfigPanelProps> = ({ onClose }) => {
         setLoading(true);
         try {
             const config = await Repo.getAllSystemConfig();
-            setApiKey(config.openai_api_key || "");
             setModel(config.openai_model || "gpt-4o");
             setAiPrompt(config.ai_report_prompt || DEFAULT_AI_PROMPT);
         } catch (error) {
@@ -60,29 +57,6 @@ const SystemConfigPanel: React.FC<SystemConfigPanelProps> = ({ onClose }) => {
         }
     };
 
-    const handleValidateKey = async () => {
-        if (!apiKey.trim()) {
-            setMessage({ type: "error", text: t('enterApiKey') });
-            return;
-        }
-
-        setValidating(true);
-        setMessage(null);
-
-        try {
-            const isValid = await validateOpenAIKey(apiKey);
-            if (isValid) {
-                setMessage({ type: "success", text: `✓ ${t('validKey')}` });
-            } else {
-                setMessage({ type: "error", text: t('invalidKey') });
-            }
-        } catch (error) {
-            setMessage({ type: "error", text: t('validationError') });
-        } finally {
-            setValidating(false);
-        }
-    };
-
     const handleSave = async () => {
         if (!profile?.id) {
             setMessage({ type: "error", text: t('notAuthenticated') });
@@ -93,7 +67,6 @@ const SystemConfigPanel: React.FC<SystemConfigPanelProps> = ({ onClose }) => {
         setMessage(null);
 
         try {
-            await Repo.updateSystemConfig("openai_api_key", apiKey, profile.id);
             await Repo.updateSystemConfig("openai_model", model, profile.id);
             await Repo.updateSystemConfig("ai_report_prompt", aiPrompt, profile.id);
             await Repo.saveProjectTags(tags, profile.id);
@@ -189,37 +162,8 @@ const SystemConfigPanel: React.FC<SystemConfigPanelProps> = ({ onClose }) => {
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     {t('apiKey')}
                                 </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="password"
-                                        value={apiKey}
-                                        onChange={(e) => setApiKey(e.target.value)}
-                                        placeholder="sk-..."
-                                        className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl text-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
-                                    />
-                                    <button
-                                        onClick={handleValidateKey}
-                                        disabled={validating || !apiKey.trim()}
-                                        className="px-4 py-3 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                    >
-                                        {validating ? (
-                                            <Loader2 size={16} className="animate-spin" />
-                                        ) : (
-                                            <CheckCircle size={16} />
-                                        )}
-                                        {t('validate')}
-                                    </button>
-                                </div>
-                                <p className="text-xs text-slate-500 mt-2">
-                                    {t('getApiKey')}{" "}
-                                    <a
-                                        href="https://platform.openai.com/api-keys"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-purple-600 hover:underline"
-                                    >
-                                        platform.openai.com/api-keys
-                                    </a>
+                                <p className="text-xs text-slate-600 bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3">
+                                    {t('apiKeyServerManaged')}
                                 </p>
                             </div>
 
@@ -409,7 +353,7 @@ const SystemConfigPanel: React.FC<SystemConfigPanelProps> = ({ onClose }) => {
                     </button>
                     <button
                         onClick={handleSave}
-                        disabled={saving || !apiKey.trim()}
+                        disabled={saving}
                         className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {saving ? (
