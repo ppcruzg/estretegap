@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { PageSummary } from "../types/columns";
+import { PageSummary } from "@/types";
 import { useCompany } from "../contexts/CompanyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "../hooks/useTranslation";

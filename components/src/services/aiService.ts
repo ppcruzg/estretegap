@@ -2,9 +2,9 @@
 // SERVICIO DE IA PARA ANÁLISIS DE ROADMAP
 // ============================================================
 
-import type { RoadmapItem, RoadmapAnalysis } from '../../../types/roadmapTypes';
-import type { StatusCategory } from '../../../types';
-import type { ChangeHistoryEntry } from '../../../types/changeHistory';
+import type { RoadmapItem, RoadmapAnalysis } from '@/types/roadmapTypes';
+import type { StatusCategory } from '@/types';
+import type { ChangeHistoryEntry } from '@/types/changeHistory';
 import * as Repo from '../repository/estrategiaRepository';
 import { supabase } from '../lib/supabaseClient';
 

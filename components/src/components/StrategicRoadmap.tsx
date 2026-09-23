@@ -13,7 +13,7 @@ import {
     Circle,
     TrendingUp
 } from 'lucide-react';
-import { PageData, DashboardItem } from '../types/columns';
+import { PageData, DashboardItem } from '@/types';
 import { parseISO, differenceInDays, format, isValid, isBefore, startOfDay, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 

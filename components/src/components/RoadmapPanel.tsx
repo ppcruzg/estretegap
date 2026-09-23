@@ -24,7 +24,7 @@ import * as Repo from "../repository/estrategiaRepository";
 import { analyzeRoadmapWithAI } from "../services/aiService";
 import { downloadRoadmapPDF } from "../services/pdfExportService";
 import EmailRoadmapModal from "./EmailRoadmapModal";
-import type { RoadmapAnalysis, CriticalPoint, Insight } from "../../../types/roadmapTypes";
+import type { RoadmapAnalysis, CriticalPoint, Insight } from "@/types/roadmapTypes";
 
 interface RoadmapPanelProps {
     pageId: string;

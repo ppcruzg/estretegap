@@ -6,7 +6,7 @@ import {
   updateCompany,
   toggleCompanyStatus
 } from "../../repository/adminRepository";
-import { Company } from "../../../../types";
+import { Company } from "@/types";
 import {
   Building2,
   Plus,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getProfiles, toggleSuperAdmin, updateProfile, signUpAdminUser, getCompanies, getCompanyUsers, removeUserFromCompany, assignUserToCompany, updateCompanyUserRole } from "../../repository/adminRepository";
-import { Profile, Company, CompanyUser } from "../../../../types";
+import { Profile, Company, CompanyUser } from "@/types";
 import { Search, UserCog, ShieldCheck, ShieldAlert, Edit2, Loader2, UserPlus, Mail } from "lucide-react";
 import Modal from "../Modal";
 import { useAuth } from "../../contexts/AuthContext";

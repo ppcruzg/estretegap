@@ -8,7 +8,7 @@ import {
   removeUserFromCompany,
   updateCompanyUserRole
 } from "../../repository/adminRepository";
-import { Company, Profile, CompanyUser } from "../../../../types";
+import { Company, Profile, CompanyUser } from "@/types";
 import {
   UserPlus,
   Trash2,

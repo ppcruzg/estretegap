@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ProjectStatus, StatusCategory, TailwindColor, ChecklistItem } from '../types';
+import { ProjectStatus, StatusCategory, TailwindColor, ChecklistItem } from '@/types';
 import EditableText from './EditableText';
 import { useTranslation } from './src/hooks/useTranslation';
 import * as Repo from './src/repository/estrategiaRepository';
-import type { ChangeHistoryEntry } from '../types/changeHistory';
+import type { ChangeHistoryEntry } from '@/types/changeHistory';
 
 import {
   Lightbulb,

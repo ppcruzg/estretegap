@@ -15,7 +15,7 @@ import {
     User
 } from "lucide-react";
 import * as Repo from "../repository/estrategiaRepository";
-import type { ChangeHistoryEntry, ChangeHistoryFilters } from "../../../types/changeHistory";
+import type { ChangeHistoryEntry, ChangeHistoryFilters } from "@/types/changeHistory";
 
 interface ChangeHistoryPanelProps {
     pageId: string;

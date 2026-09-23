@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
-import { Profile, Company, CompanyUser } from "../../../types";
+import { Profile, Company, CompanyUser } from "@/types";
 
 /**
  * Repository for Administration logic (Profiles, Companies, Roles).

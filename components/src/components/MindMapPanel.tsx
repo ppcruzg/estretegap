@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef } from "react";
 import { X, Network, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
-import { PageData, DashboardColumn, DashboardItem } from "../../../types";
+import { PageData, DashboardColumn, DashboardItem } from "@/types";
 import { useTranslation } from "../hooks/useTranslation";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";

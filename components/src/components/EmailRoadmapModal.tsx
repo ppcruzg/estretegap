@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Mail, Loader2, Send, UserPlus } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { exportRoadmapToPDF } from "../services/pdfExportService";
-import type { RoadmapAnalysis } from "../../../types/roadmapTypes";
+import type { RoadmapAnalysis } from "@/types/roadmapTypes";
 
 interface EmailRoadmapModalProps {
     analysis: RoadmapAnalysis;

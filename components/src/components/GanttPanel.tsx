@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { X, GanttChart, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, Clock, Calendar, Flag, Activity, Sparkles } from "lucide-react";
-import { PageData, DashboardColumn, DashboardItem } from "../../../types";
+import { PageData, DashboardColumn, DashboardItem } from "@/types";
 import { useTranslation } from "../hooks/useTranslation";
 import {
     format,

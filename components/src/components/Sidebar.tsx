@@ -1,5 +1,5 @@
 import React from "react";
-import { PageSummary } from "../types/columns";
+import { PageSummary } from "@/types";
 import { ChevronLeft, ChevronRight, FileText, Shield, LogOut, Plus, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";

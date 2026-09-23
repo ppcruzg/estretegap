@@ -2,7 +2,7 @@
 // Mantiene integridad entre Supabase y el Front.
 
 import { supabase } from "../lib/supabaseClient";
-import { PageSummary, PageData, PageConfig, DashboardColumn } from "../../../types";
+import { PageSummary, PageData, PageConfig, DashboardColumn } from "@/types";
 
 /* ============================================================
    MAPEO SEGURO DE PAGE CONFIG
@@ -603,7 +603,7 @@ import type {
   ChangeHistoryFilters,
   MovementReport,
   ChangeHistoryStats
-} from "../../../types/changeHistory";
+} from "@/types/changeHistory";
 
 /**
  * Obtiene el historial de cambios de una página con filtros opcionales
@@ -852,7 +852,7 @@ export async function getChangeHistoryStats(pageId: string): Promise<ChangeHisto
 // ROADMAP ANALYSIS (ANÁLISIS DE ROADMAP CON IA)
 // ======================================================
 
-import type { RoadmapItem, RoadmapAnalysis, SystemConfig } from "../../../types/roadmapTypes";
+import type { RoadmapItem, RoadmapAnalysis, SystemConfig } from "@/types/roadmapTypes";
 
 /**
  * Obtiene todos los items con fechas para análisis de roadmap

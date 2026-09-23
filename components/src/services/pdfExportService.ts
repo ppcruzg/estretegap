@@ -5,7 +5,7 @@
 import jsPDF from 'jspdf';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { RoadmapAnalysis } from '../../../types/roadmapTypes';
+import type { RoadmapAnalysis } from '@/types/roadmapTypes';
 
 /**
  * Exporta el análisis de roadmap a PDF y retorna el blob
