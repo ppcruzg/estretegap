@@ -1,0 +1,239 @@
+/*
+ * Theme palettes.
+ *
+ * <html data-theme="ocean|emerald|violet|amber|graphite" class="dark?">
+ *
+ * - `html` / `html.dark` hold mode-level values shared by every palette
+ *   (feedback colors, elevation, color-scheme).
+ * - One block per palette x mode defines the full palette token set.
+ *   Ocean doubles as the default when no data-theme is present.
+ *
+ * Tokens are exposed to Tailwind in index.css (`@theme inline`), e.g.
+ * `bg-surface`, `text-fg-muted`, `border-border`, `bg-primary`.
+ *
+ * Contrast targets (enforced by themes.test.ts):
+ *   fg-muted >= 4.5:1 on bg / surface / surface-muted, fg-subtle >= 3:1 on surface
+ *   (non-essential text only), *-fg on its fill >= 4.5:1, ring >= 3:1 on surface.
+ */
+
+/* ---------------------------------------------------------------- modes */
+
+html {
+  color-scheme: light;
+  --danger: #c81e1e;
+  --danger-fg: #ffffff;
+  --danger-soft: #fef2f2;
+  --success: #047857;
+  --success-soft: #ecfdf5;
+  --warning: #b45309;
+  --warning-soft: #fffbeb;
+  --elev-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --elev-pop: 0 10px 30px -8px rgb(15 23 42 / 0.18), 0 2px 6px -2px rgb(15 23 42 / 0.08);
+  --overlay: rgb(15 23 42 / 0.45);
+}
+
+html.dark {
+  color-scheme: dark;
+  --danger: #f87171;
+  --danger-fg: #1f0707;
+  --danger-soft: #2b1316;
+  --success: #34d399;
+  --success-soft: #0f2a20;
+  --warning: #fbbf24;
+  --warning-soft: #2a2110;
+  --elev-card: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --elev-pop: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --overlay: rgb(2 6 12 / 0.65);
+}
+
+/* ---------------------------------------------------------------- ocean (default) */
+
+:root,
+:root[data-theme="ocean"] {
+  --bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface-muted: #eef3f9;
+  --surface-raised: #ffffff;
+  --fg: #0f172a;
+  --fg-muted: #475569;
+  --fg-subtle: #7a879b;
+  --border: #e1e8f1;
+  --border-strong: #cbd5e1;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-fg: #ffffff;
+  --primary-soft: #eaf1fe;
+  --primary-soft-fg: #1d4ed8;
+  --ring: #3b82f6;
+}
+
+:root.dark,
+:root[data-theme="ocean"].dark {
+  --bg: #0a111e;
+  --surface: #111a2b;
+  --surface-muted: #16213a;
+  --surface-raised: #1a2640;
+  --fg: #e6edf7;
+  --fg-muted: #9fb0c8;
+  --fg-subtle: #6f829e;
+  --border: #22304a;
+  --border-strong: #34466a;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-fg: #ffffff;
+  --primary-soft: #172a52;
+  --primary-soft-fg: #93c5fd;
+  --ring: #60a5fa;
+}
+
+/* ---------------------------------------------------------------- emerald */
+
+:root[data-theme="emerald"] {
+  --bg: #f2f8f5;
+  --surface: #ffffff;
+  --surface-muted: #eaf4ef;
+  --surface-raised: #ffffff;
+  --fg: #0e1f19;
+  --fg-muted: #46594f;
+  --fg-subtle: #768b80;
+  --border: #dde9e3;
+  --border-strong: #c2d6cc;
+  --primary: #047857;
+  --primary-hover: #065f46;
+  --primary-fg: #ffffff;
+  --primary-soft: #e3f6ed;
+  --primary-soft-fg: #065f46;
+  --ring: #059669;
+}
+
+:root[data-theme="emerald"].dark {
+  --bg: #07110d;
+  --surface: #0d1a15;
+  --surface-muted: #12231c;
+  --surface-raised: #152920;
+  --fg: #e3f1ea;
+  --fg-muted: #9db8ab;
+  --fg-subtle: #6a8578;
+  --border: #1d3229;
+  --border-strong: #2c473b;
+  --primary: #10b981;
+  --primary-hover: #34d399;
+  --primary-fg: #03241a;
+  --primary-soft: #0f2e22;
+  --primary-soft-fg: #6ee7b7;
+  --ring: #34d399;
+}
+
+/* ---------------------------------------------------------------- violet */
+
+:root[data-theme="violet"] {
+  --bg: #f6f4fc;
+  --surface: #ffffff;
+  --surface-muted: #f0edfa;
+  --surface-raised: #ffffff;
+  --fg: #1a1530;
+  --fg-muted: #524a6b;
+  --fg-subtle: #837b9c;
+  --border: #e5e0f3;
+  --border-strong: #d0c8e7;
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-fg: #ffffff;
+  --primary-soft: #f1ecff;
+  --primary-soft-fg: #6d28d9;
+  --ring: #8b5cf6;
+}
+
+:root[data-theme="violet"].dark {
+  --bg: #0d0a17;
+  --surface: #151122;
+  --surface-muted: #1b162c;
+  --surface-raised: #201a34;
+  --fg: #ece8f8;
+  --fg-muted: #b0a7cc;
+  --fg-subtle: #7f769b;
+  --border: #2a2340;
+  --border-strong: #3e345b;
+  --primary: #7c3aed;
+  --primary-hover: #8b5cf6;
+  --primary-fg: #ffffff;
+  --primary-soft: #261b47;
+  --primary-soft-fg: #c4b5fd;
+  --ring: #a78bfa;
+}
+
+/* ---------------------------------------------------------------- amber */
+
+:root[data-theme="amber"] {
+  --bg: #faf7f1;
+  --surface: #ffffff;
+  --surface-muted: #f6f1e7;
+  --surface-raised: #ffffff;
+  --fg: #1c1917;
+  --fg-muted: #57534e;
+  --fg-subtle: #8a8279;
+  --border: #ece5d8;
+  --border-strong: #dbd0bd;
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
+  --primary-fg: #1f1403;
+  --primary-soft: #fff4dc;
+  --primary-soft-fg: #92400e;
+  --ring: #d97706;
+}
+
+:root[data-theme="amber"].dark {
+  --bg: #100e0a;
+  --surface: #1a1712;
+  --surface-muted: #221e17;
+  --surface-raised: #27221a;
+  --fg: #f5efe6;
+  --fg-muted: #b8ad9c;
+  --fg-subtle: #877c6c;
+  --border: #302a21;
+  --border-strong: #453d30;
+  --primary: #fbbf24;
+  --primary-hover: #f59e0b;
+  --primary-fg: #1f1403;
+  --primary-soft: #2e2410;
+  --primary-soft-fg: #fcd34d;
+  --ring: #fbbf24;
+}
+
+/* ---------------------------------------------------------------- graphite */
+
+:root[data-theme="graphite"] {
+  --bg: #f4f4f5;
+  --surface: #ffffff;
+  --surface-muted: #efeff1;
+  --surface-raised: #ffffff;
+  --fg: #18181b;
+  --fg-muted: #52525b;
+  --fg-subtle: #83838c;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --primary: #18181b;
+  --primary-hover: #3f3f46;
+  --primary-fg: #ffffff;
+  --primary-soft: #ececef;
+  --primary-soft-fg: #27272a;
+  --ring: #52525b;
+}
+
+:root[data-theme="graphite"].dark {
+  --bg: #0a0a0b;
+  --surface: #141416;
+  --surface-muted: #1b1b1e;
+  --surface-raised: #202024;
+  --fg: #f4f4f5;
+  --fg-muted: #a1a1aa;
+  --fg-subtle: #74747d;
+  --border: #27272a;
+  --border-strong: #3a3a40;
+  --primary: #f4f4f5;
+  --primary-hover: #d4d4d8;
+  --primary-fg: #18181b;
+  --primary-soft: #26262a;
+  --primary-soft-fg: #e4e4e7;
+  --ring: #a1a1aa;
+}

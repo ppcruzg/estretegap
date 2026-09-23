@@ -23,6 +23,7 @@ import { Building2, LogIn, Loader2, Map } from "lucide-react";
 import AuthContainer from "../AuthContainer";
 import { getDefaultStatuses } from "../../helpers/statuses";
 import { useTranslation } from "../../hooks/useTranslation";
+import { Button, Card } from "../ui";
 
 
 const PageView: React.FC = () => {
@@ -471,10 +472,10 @@ const PageView: React.FC = () => {
 
   if (loadingAuth || loadingCompanies || isRoleLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6 transition-colors">
+      <div className="min-h-screen bg-bg flex items-center justify-center p-6 transition-colors">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin shadow-sm" />
-          <span className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">{t('syncingAccess')}</span>
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-fg-muted font-medium animate-pulse">{t('syncingAccess')}</span>
         </div>
       </div>
     );
@@ -482,41 +483,39 @@ const PageView: React.FC = () => {
 
   if (!activeCompanyId) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center transition-colors">
-        <div className="bg-white dark:bg-slate-900 p-10 rounded-3xl shadow-xl shadow-slate-200 dark:shadow-none border border-slate-100 dark:border-slate-800 max-w-md w-full animate-in fade-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center p-6 text-center transition-colors">
+        <Card padded={false} elevation="pop" className="p-10 max-w-md w-full animate-in fade-in zoom-in duration-300">
+          <div className="w-20 h-20 bg-primary-soft text-primary-soft-fg rounded-card flex items-center justify-center mx-auto mb-6">
             <Building2 size={40} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t('selectCompany')}</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+          <h2 className="text-2xl font-bold text-fg tracking-tight mb-2">{t('selectCompany')}</h2>
+          <p className="text-fg-muted mb-8 leading-relaxed">
             {t('noCompanyAssigned')}
           </p>
 
           <div className="space-y-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
-            >
+            <Button onClick={() => window.location.reload()} className="w-full">
               {t('refreshPage')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={async () => {
                 await supabase.auth.signOut();
                 window.location.reload();
               }}
-              className="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              className="w-full"
             >
               {t('signOut')}
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors">
+      <div className="flex bg-bg text-fg min-h-screen transition-colors">
         <Sidebar
           pages={pages}
           currentPageId={currentPageId}
@@ -530,7 +529,7 @@ const PageView: React.FC = () => {
           canCreatePage={canCreatePage}
         />
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           <TopBar
             pages={pages}
             currentPageId={currentPageId}
@@ -553,9 +552,9 @@ const PageView: React.FC = () => {
           />
 
           {isLoading || !currentPage ? (
-            <div className="p-4 text-slate-500 dark:text-slate-400">{t('loadingPage')}</div>
+            <div className="p-6 text-fg-muted">{t('loadingPage')}</div>
           ) : (
-            <div className="p-4 flex flex-col h-full">
+            <div className="p-6 flex flex-col h-full">
               <div className="flex-1 overflow-auto">
                 <ColumnGroup
                   columns={currentPage.columns}

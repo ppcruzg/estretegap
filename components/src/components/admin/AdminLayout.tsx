@@ -4,8 +4,7 @@ import { Users, Building2, UserPlus, ArrowLeft, LogOut, Shield, User as UserIcon
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useTheme } from "../../contexts/ThemeContext";
-import { Sun, Moon } from "lucide-react";
+import ThemePicker from "../ThemePicker";
 
 interface AdminLayoutProps {
     title: string;
@@ -16,7 +15,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
     const location = useLocation();
     const { profile, isSuperAdmin: isGlobalAdmin } = useAuth();
     const { t, language, toggleLanguage } = useTranslation();
-    const { theme, toggleTheme } = useTheme();
 
     const menuItems = [
         {
@@ -86,14 +84,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
                         <span className="text-[11px] font-bold uppercase tracking-tight">{language}</span>
                     </button>
 
-                    {/* Tema */}
-                    <button
-                        onClick={toggleTheme}
-                        className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
-                        title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-                    >
-                        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-                    </button>
+                    {/* Tema (paleta + claro/oscuro) */}
+                    <ThemePicker />
 
                     <button
                         onClick={async () => {

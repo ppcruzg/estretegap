@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useId } from "react";
+import { Layers } from "lucide-react";
 import { useTranslation } from "./src/hooks/useTranslation";
+import { Button, Card, Input, cn, focusRing } from "./src/components/ui";
 
 interface AuthPanelProps {
   mode: "login" | "reset";
@@ -28,6 +30,8 @@ export default function AuthPanel({
 }: AuthPanelProps) {
   const { t } = useTranslation();
   const isLogin = mode === "login";
+  const emailId = useId();
+  const passwordId = useId();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,44 +42,47 @@ export default function AuthPanel({
     }
   };
 
+  const tabClasses = (active: boolean) =>
+    cn(
+      "flex-1 h-9 rounded-[calc(var(--radius-control)-2px)] text-sm font-semibold transition-colors",
+      focusRing,
+      active ? "bg-surface text-fg shadow-card" : "text-fg-muted hover:text-fg",
+    );
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-2xl p-8">
-        <div className="text-center mb-6">
-          <div className="text-3xl font-bold text-white tracking-wide">
-            Estrategia
+    <div className="relative min-h-screen flex items-center justify-center bg-bg px-4 overflow-hidden">
+      {/* Soft palette-tinted glow behind the card */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[820px] rounded-full bg-primary-soft blur-3xl opacity-80"
+      />
+
+      <Card padded={false} elevation="pop" className="relative w-full max-w-md p-8">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="w-12 h-12 mb-4 rounded-card bg-primary text-primary-fg flex items-center justify-center shadow-card">
+            <Layers size={22} />
           </div>
-          <div className="text-slate-300 text-sm mt-1">
-            {t('adminPortal')}
-          </div>
+          <h1 className="text-2xl font-bold text-fg tracking-tight">Estrategia</h1>
+          <p className="text-fg-muted text-sm mt-1">{t('adminPortal')}</p>
         </div>
 
-        <div className="flex gap-2 mb-4 bg-white/5 p-1 rounded-lg border border-white/10">
-          <button
-            type="button"
-            onClick={() => onSwitchMode("login")}
-            className={`flex-1 py-2 rounded-md text-sm font-semibold transition ${isLogin ? "bg-blue-600 text-white" : "text-slate-200 hover:bg-white/10"
-              }`}
-          >
+        <div className="flex gap-1 mb-6 bg-surface-muted p-1 rounded-control border border-border">
+          <button type="button" onClick={() => onSwitchMode("login")} className={tabClasses(isLogin)} aria-pressed={isLogin}>
             {t('login')}
           </button>
-          <button
-            type="button"
-            onClick={() => onSwitchMode("reset")}
-            className={`flex-1 py-2 rounded-md text-sm font-semibold transition ${!isLogin ? "bg-blue-600 text-white" : "text-slate-200 hover:bg-white/10"
-              }`}
-          >
+          <button type="button" onClick={() => onSwitchMode("reset")} className={tabClasses(!isLogin)} aria-pressed={!isLogin}>
             {t('recoverAccess')}
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm text-slate-200 mb-1 block">{t('email')}</label>
-            <input
+            <label htmlFor={emailId} className="text-sm font-medium text-fg mb-1.5 block">{t('email')}</label>
+            <Input
+              id={emailId}
               type="email"
               required
-              className="w-full rounded-lg px-3 py-2 bg-slate-800 text-white border border-slate-600 focus:border-blue-400 focus:ring-2 focus:ring-blue-500 outline-none transition"
+              autoComplete="email"
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder="usuario@dominio.com"
@@ -84,11 +91,12 @@ export default function AuthPanel({
 
           {isLogin && (
             <div>
-              <label className="text-sm text-slate-200 mb-1 block">{t('password')}</label>
-              <input
+              <label htmlFor={passwordId} className="text-sm font-medium text-fg mb-1.5 block">{t('password')}</label>
+              <Input
+                id={passwordId}
                 type="password"
                 required
-                className="w-full rounded-lg px-3 py-2 bg-slate-800 text-white border border-slate-600 focus:border-blue-400 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
                 placeholder="********"
@@ -97,35 +105,28 @@ export default function AuthPanel({
           )}
 
           {message && (
-            <div className="text-emerald-300 text-sm text-center mt-1">{message}</div>
+            <div role="status" className="text-sm text-center px-3 py-2 rounded-control bg-success-soft text-success">{message}</div>
           )}
 
           {error && (
-            <div className="text-red-400 text-sm text-center mt-1">{error}</div>
+            <div role="alert" className="text-sm text-center px-3 py-2 rounded-control bg-danger-soft text-danger">{error}</div>
           )}
 
-          <button
-            type="submit"
-            className="mt-2 py-2 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition"
-          >
+          <Button type="submit" className="mt-2 w-full">
             {isLogin ? t('login') : t('sendRecoverLink')}
-          </button>
+          </Button>
         </form>
 
         {isLogin && (
-          <button
-            type="button"
-            onClick={() => onSwitchMode("reset")}
-            className="w-full text-sm text-slate-300 mt-3 hover:text-white transition"
-          >
+          <Button variant="ghost" onClick={() => onSwitchMode("reset")} className="w-full mt-2">
             {t('forgotPassword')}
-          </button>
+          </Button>
         )}
 
-        <div className="text-center text-xs text-slate-400 mt-6">
+        <div className="text-center text-xs text-fg-muted mt-6">
           © {new Date().getFullYear()} Estrategia — {t('adminPanelSub')}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

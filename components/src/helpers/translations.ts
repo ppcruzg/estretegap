@@ -22,6 +22,21 @@ export const translations = {
         consultant: "Consultor",
         user: "Usuario",
 
+        // Theme picker
+        appearance: "Apariencia",
+        themePalette: "Paleta de color",
+        darkMode: "Modo oscuro",
+        paletteOcean: "Océano",
+        paletteEmerald: "Esmeralda",
+        paletteViolet: "Violeta",
+        paletteAmber: "Ámbar",
+        paletteGraphite: "Grafito",
+        close: "Cerrar",
+        orange: "Naranja",
+        pink: "Rosa",
+        renamePage: "Renombrar página",
+        executiveRoadmap: "Roadmap Ejecutivo",
+
         // DiagramNode
         addDescription: "Añadir descripción...",
         responsible: "Resp.",
@@ -273,6 +288,21 @@ export const translations = {
         admin: "Administrator",
         consultant: "Consultant",
         user: "User",
+
+        // Theme picker
+        appearance: "Appearance",
+        themePalette: "Color palette",
+        darkMode: "Dark mode",
+        paletteOcean: "Ocean",
+        paletteEmerald: "Emerald",
+        paletteViolet: "Violet",
+        paletteAmber: "Amber",
+        paletteGraphite: "Graphite",
+        close: "Close",
+        orange: "Orange",
+        pink: "Pink",
+        renamePage: "Rename page",
+        executiveRoadmap: "Executive Roadmap",
 
         // DiagramNode
         addDescription: "Add description...",

@@ -19,13 +19,13 @@ import {
   TrendingUp,
   Settings,
   Languages,
-  Sun,
-  Moon,
   Network,
   GanttChart,
   Map
 } from "lucide-react";
-import { useTheme } from "../contexts/ThemeContext";
+import ThemePicker from "./ThemePicker";
+import IconButton from "./ui/IconButton";
+import { Button } from "./ui";
 
 interface TopBarProps {
   pages: PageSummary[];
@@ -90,7 +90,6 @@ const TopBar: React.FC<TopBarProps> = ({
     if (currentPage) setTitleDraft(currentPage.title);
   }, [currentPage]);
 
-  const { theme, toggleTheme } = useTheme();
   const activeCompany = companies.find(c => c.id === activeCompanyId);
 
   const handleRenameSubmit = () => {
@@ -100,23 +99,30 @@ const TopBar: React.FC<TopBarProps> = ({
     setIsEditingTitle(false);
   };
 
+  const roleBadge = isSuperAdmin
+    ? "bg-warning-soft text-warning"
+    : companyRole === "company-admin"
+      ? "bg-primary-soft text-primary-soft-fg"
+      : "bg-surface-muted text-fg-muted";
+
   return (
-    <div className="flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors">
+    <div className="flex items-center justify-between gap-4 px-6 py-3 bg-surface/90 backdrop-blur-md border-b border-border sticky top-0 z-40 transition-colors">
       {/* IZQUIERDA: Marca + Empresa + Selector Página */}
       <div className="flex items-center gap-6 flex-1 min-w-0">
 
-        {/* Selector de Empresa (Premium) */}
+        {/* Selector de Empresa */}
         <div className="relative group">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-sm">
+          <div className="flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 bg-surface-muted border border-border rounded-control hover:border-border-strong focus-within:ring-2 focus-within:ring-ring transition-colors cursor-pointer">
+            <div className="w-8 h-8 bg-primary text-primary-fg rounded-control flex items-center justify-center shadow-card">
               <Building2 size={18} />
             </div>
             <div className="flex flex-col pr-2">
-              <span className="text-[10px] uppercase font-bold text-slate-400 leading-none">{t('company')}</span>
+              <span className="text-[11px] uppercase font-semibold tracking-wide text-fg-muted leading-none">{t('company')}</span>
               <select
                 value={activeCompanyId ?? ""}
                 onChange={(e) => setActiveCompanyId(e.target.value)}
-                className="bg-transparent text-sm font-bold text-slate-900 dark:text-slate-100 outline-none appearance-none cursor-pointer pr-4"
+                aria-label={t('company')}
+                className="bg-transparent text-sm font-semibold text-fg outline-none appearance-none cursor-pointer pr-4"
               >
                 {companies.map((company) => (
                   <option key={company.id} value={company.id}>
@@ -125,25 +131,25 @@ const TopBar: React.FC<TopBarProps> = ({
                 ))}
               </select>
             </div>
-            <ChevronDown size={14} className="text-slate-400" />
+            <ChevronDown size={14} className="text-fg-subtle" />
           </div>
         </div>
 
-        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block" />
+        <div className="h-8 w-px bg-border hidden md:block" />
 
         {/* Título y Selector de Página */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 rounded-control bg-primary-soft text-primary-soft-fg flex items-center justify-center">
             <Layout size={18} />
           </div>
 
           <div className="flex flex-col flex-1 min-w-0">
             <div className="flex items-center gap-2 group">
               {isEditingTitle ? (
-                <div className="flex items-center gap-2 bg-white border border-blue-500 rounded-md px-2 py-0.5 shadow-sm">
+                <div className="flex items-center gap-2 bg-surface border border-primary rounded-control px-2 py-0.5 ring-2 ring-ring/30">
                   <input
                     autoFocus
-                    className="text-lg font-bold text-slate-900 outline-none w-full"
+                    className="text-lg font-bold text-fg bg-transparent outline-none w-full"
                     value={titleDraft}
                     onChange={(e) => setTitleDraft(e.target.value)}
                     onBlur={handleRenameSubmit}
@@ -158,16 +164,18 @@ const TopBar: React.FC<TopBarProps> = ({
                 </div>
               ) : (
                 <>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 truncate">
+                  <h2 className="text-lg font-bold text-fg tracking-tight truncate">
                     {currentPage?.title || t('selectPage')}
                   </h2>
                   {currentPage && canEdit && (
-                    <button
+                    <IconButton
+                      aria-label={t('renamePage')}
+                      size="sm"
                       onClick={() => setIsEditingTitle(true)}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-md transition-all text-slate-400 hover:text-blue-600"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                     >
                       <Edit3 size={14} />
-                    </button>
+                    </IconButton>
                   )}
                 </>
               )}
@@ -175,7 +183,7 @@ const TopBar: React.FC<TopBarProps> = ({
 
             {/* Descripción (Subtítulo) */}
             <div className="flex items-center gap-2">
-              <FileText size={12} className="text-slate-400 shrink-0" />
+              <FileText size={12} className="text-fg-subtle shrink-0" />
               {isEditingDesc ? (
                 <input
                   autoFocus
@@ -195,12 +203,12 @@ const TopBar: React.FC<TopBarProps> = ({
                       setDescDraft(pageDescription);
                     }
                   }}
-                  className="text-xs text-slate-600 dark:text-slate-400 bg-transparent border-b border-blue-400 outline-none w-full"
+                  className="text-xs text-fg-muted bg-transparent border-b border-primary outline-none w-full"
                   placeholder={t('addPageDescription')}
                 />
               ) : (
                 <span
-                  className={`text-xs text-slate-500 dark:text-slate-400 truncate block transition-colors ${canEdit ? "cursor-text hover:text-slate-900 dark:hover:text-slate-200" : ""}`}
+                  className={`text-xs text-fg-muted truncate block transition-colors ${canEdit ? "cursor-text hover:text-fg" : ""}`}
                   onClick={() => canEdit && setIsEditingDesc(true)}
                   title={pageDescription || t('addPageDescription')}
                 >
@@ -213,148 +221,109 @@ const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* DERECHA: Acciones de Página + Perfil de Usuario */}
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
 
         {/* Boton de Idioma */}
         <button
+          type="button"
           onClick={toggleLanguage}
-          className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 transition-all active:scale-95 group"
+          className="flex items-center gap-1.5 h-9 px-2.5 bg-surface-muted border border-border rounded-control text-fg-muted hover:text-primary-soft-fg hover:border-border-strong transition-colors active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title={language === 'es' ? t('switchToEnglish') : t('switchToSpanish')}
+          aria-label={language === 'es' ? t('switchToEnglish') : t('switchToSpanish')}
         >
           <Languages size={16} className="group-hover:rotate-12 transition-transform" />
           <span className="text-[11px] font-bold uppercase tracking-tight">{language}</span>
         </button>
 
-        {/* Boton de Tema */}
-        <button
-          onClick={toggleTheme}
-          className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
-          title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-        >
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
+        {/* Selector de Tema (paleta + claro/oscuro) */}
+        <ThemePicker />
 
         {/* Botones de Acción */}
-        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-700 transition-colors">
+        <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-control border border-border transition-colors">
           {canCreatePage && (
-            <button
-              onClick={onCreatePage}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-blue-700 transition-all active:scale-95"
-            >
+            <Button size="sm" onClick={onCreatePage} className="mr-1">
               <Plus size={14} />
               <span className="hidden sm:inline">{t('newPage')}</span>
-            </button>
+            </Button>
           )}
 
           {currentPage && onShowRoadmap && (
-            <button
-              onClick={onShowRoadmap}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-all"
-              title={t('viewRoadmapAI')}
-            >
+            <IconButton size="sm" aria-label={t('viewRoadmapAI')} onClick={onShowRoadmap}>
               <TrendingUp size={16} />
-            </button>
+            </IconButton>
           )}
 
           {currentPage && onShowExecutiveTimeline && (
-            <button
-              onClick={onShowExecutiveTimeline}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
-              title="Roadmap Ejecutivo"
-            >
+            <IconButton size="sm" aria-label={t('executiveRoadmap')} onClick={onShowExecutiveTimeline}>
               <Map size={16} />
-            </button>
+            </IconButton>
           )}
 
           {currentPage && onShowMindMap && (
-            <button
-              onClick={onShowMindMap}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
-              title={t('viewMindMap')}
-            >
+            <IconButton size="sm" aria-label={t('viewMindMap')} onClick={onShowMindMap}>
               <Network size={16} />
-            </button>
+            </IconButton>
           )}
 
           {currentPage && onShowGantt && (
-            <button
-              onClick={onShowGantt}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"
-              title={t('viewGantt')}
-            >
+            <IconButton size="sm" aria-label={t('viewGantt')} onClick={onShowGantt}>
               <GanttChart size={16} />
-            </button>
+            </IconButton>
           )}
 
           {currentPage && onShowHistory && (
-            <button
-              onClick={onShowHistory}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all"
-              title={t('viewHistory')}
-            >
+            <IconButton size="sm" aria-label={t('viewHistory')} onClick={onShowHistory}>
               <Clock size={16} />
-            </button>
+            </IconButton>
           )}
 
           {isSuperAdmin && onShowConfig && (
-            <button
-              onClick={onShowConfig}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-all"
-              title={t('systemConfig')}
-            >
+            <IconButton size="sm" aria-label={t('systemConfig')} onClick={onShowConfig}>
               <Settings size={16} />
-            </button>
+            </IconButton>
           )}
 
           {currentPage && canEdit && (
-            <button
+            <IconButton
+              size="sm"
+              variant="danger"
+              aria-label={t('deletePage')}
               onClick={() => {
                 if (window.confirm(t('confirmDeletePage', { title: currentPage.title }))) {
                   onDeletePage(currentPage.id);
                 }
               }}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-all"
-              title={t('deletePage')}
             >
               <Trash2 size={16} />
-            </button>
+            </IconButton>
           )}
 
           {currentPage && (isSuperAdmin || companyRole === 'company-admin') && (
-            <button
-              onClick={onManagePermissions}
-              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
-              title={t('managePermissions')}
-            >
+            <IconButton size="sm" aria-label={t('managePermissions')} onClick={onManagePermissions}>
               <Users size={16} />
-            </button>
+            </IconButton>
           )}
         </div>
 
-        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+        <div className="h-8 w-px bg-border" />
 
-        {/* Perfil de Usuario (Premium) */}
-        <div className="flex items-center gap-3 pl-2 group">
-          <div className="flex flex-col items-end hidden md:flex text-right">
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">
+        {/* Perfil de Usuario */}
+        <div className="flex items-center gap-3 pl-1 group">
+          <div className="flex-col items-end hidden md:flex text-right">
+            <span className="text-sm font-semibold text-fg leading-tight">
               {profile?.name || t('user')}
             </span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isSuperAdmin
-              ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-              : companyRole === "company-admin"
-                ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-              }`}>
+            <span className={`mt-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md uppercase tracking-wide ${roleBadge}`}>
               {isSuperAdmin ? t('superadmin') : companyRole === "company-admin" ? t('admin') : t('consultant')}
             </span>
           </div>
-          <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm relative group-hover:border-blue-300 transition-all">
+          <div className="w-10 h-10 bg-surface-muted border border-border rounded-full flex items-center justify-center text-fg-muted relative group-hover:border-border-strong transition-colors">
             <User size={20} />
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success border-2 border-surface rounded-full" />
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

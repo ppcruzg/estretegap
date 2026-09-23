@@ -159,12 +159,13 @@ const EditableText: React.FC<EditableTextProps> = ({
   };
 
   const baseInputStyles =
-    "rounded px-1 outline-none w-full border transition-colors font-inherit";
+    "rounded-md px-1 outline-none w-full border transition-colors font-inherit";
 
+  // 'light' = text on a saturated/colored background; 'dark' = text on an app surface.
   const variantStyles =
     variant === 'light'
-      ? "bg-white/20 text-white dark:text-slate-200 border-white/30 dark:border-slate-700 focus:bg-white/30 dark:focus:bg-slate-800 placeholder-white/50"
-      : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-blue-300 dark:border-blue-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 shadow-sm placeholder-slate-300 dark:placeholder-slate-600";
+      ? "bg-white/20 text-white border-white/30 focus:bg-white/30 placeholder-white/50"
+      : "bg-surface text-fg border-primary focus:ring-2 focus:ring-ring/30 placeholder:text-fg-subtle";
 
   if (isEditing) {
     if (multiline) {
@@ -184,13 +185,13 @@ const EditableText: React.FC<EditableTextProps> = ({
           />
 
           {showSuggestions && (
-            <div className="absolute z-[1000] left-0 top-full mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl dark:shadow-none overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2">
+            <div className="absolute z-[1000] left-0 top-full mt-1 w-full bg-surface-raised border border-border rounded-control shadow-pop overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="bg-surface-muted px-3 py-1.5 border-b border-border flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Hash size={12} className="text-slate-400 dark:text-slate-500" />
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Etiquetas Disponibles</span>
+                  <Hash size={12} className="text-fg-subtle" />
+                  <span className="text-[11px] font-semibold text-fg-muted uppercase tracking-wider">Etiquetas Disponibles</span>
                 </div>
-                <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{filteredSuggestions.length} resultados</span>
+                <span className="text-[11px] text-fg-muted font-medium">{filteredSuggestions.length} resultados</span>
               </div>
               <div className="max-h-60 overflow-y-auto overscroll-contain">
                 {filteredSuggestions.map((tag, idx) => (
@@ -198,11 +199,11 @@ const EditableText: React.FC<EditableTextProps> = ({
                     key={tag}
                     onClick={() => insertTag(tag)}
                     onMouseEnter={() => setHighlightedIndex(idx)}
-                    className={`px-3 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${highlightedIndex === idx ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    className={`px-3 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${highlightedIndex === idx ? 'bg-primary-soft text-primary-soft-fg' : 'text-fg-muted hover:bg-surface-muted'
                       }`}
                   >
                     <span className="font-medium">{tag}</span>
-                    {highlightedIndex === idx && <span className="text-[10px] opacity-60">Enter ↲</span>}
+                    {highlightedIndex === idx && <span className="text-[11px] opacity-70">Enter ↲</span>}
                   </div>
                 ))}
               </div>
@@ -237,7 +238,7 @@ const EditableText: React.FC<EditableTextProps> = ({
       onDragStart={(e) => e.stopPropagation()}
       draggable={false}
       className={`select-text cursor-text rounded px-1 -ml-1 border border-transparent transition-all relative group 
-        ${variant === 'light' ? 'hover:bg-white/10 hover:border-white/10' : 'hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700'} 
+        ${variant === 'light' ? 'hover:bg-white/10 hover:border-white/10' : 'hover:bg-surface-muted hover:border-border'} 
         ${!value ? 'italic opacity-60 text-xs py-1' : ''}
         ${className}`}
       title="Click to edit"
@@ -245,7 +246,7 @@ const EditableText: React.FC<EditableTextProps> = ({
       {value || placeholder}
       <Pencil
         className={`absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 w-3 h-3 
-        ${variant === 'light' ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`}
+        ${variant === 'light' ? 'text-white' : 'text-fg-subtle'}`}
       />
     </div>
   );

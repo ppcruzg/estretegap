@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useId, useRef } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "../hooks/useTranslation";
+import IconButton from "./ui/IconButton";
 
 interface ModalProps {
     isOpen: boolean;
@@ -10,6 +12,14 @@ interface ModalProps {
     maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
 }
 
+const maxWidthClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+};
+
 const Modal: React.FC<ModalProps> = ({
     isOpen,
     onClose,
@@ -18,6 +28,10 @@ const Modal: React.FC<ModalProps> = ({
     footer,
     maxWidth = "md",
 }) => {
+    const { t } = useTranslation();
+    const titleId = useId();
+    const dialogRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
@@ -26,31 +40,33 @@ const Modal: React.FC<ModalProps> = ({
         return () => window.removeEventListener("keydown", handleEsc);
     }, [isOpen, onClose]);
 
+    // Move focus into the dialog on open and restore it on close.
+    useEffect(() => {
+        if (!isOpen) return;
+        const previouslyFocused = document.activeElement as HTMLElement | null;
+        dialogRef.current?.focus();
+        return () => previouslyFocused?.focus?.();
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
-    const maxWidthClasses = {
-        sm: "max-w-sm",
-        md: "max-w-md",
-        lg: "max-w-lg",
-        xl: "max-w-xl",
-        "2xl": "max-w-2xl",
-    };
-
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-overlay backdrop-blur-sm animate-in fade-in duration-200">
             <div
-                className={`bg-white rounded-xl shadow-2xl w-full ${maxWidthClasses[maxWidth]} overflow-hidden animate-in zoom-in-95 duration-200`}
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className={`bg-surface-raised text-fg border border-border rounded-card shadow-pop w-full ${maxWidthClasses[maxWidth]} overflow-hidden outline-none animate-in zoom-in-95 duration-200`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                    <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
-                    <button
-                        onClick={onClose}
-                        className="p-1 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
-                    >
-                        <X size={20} />
-                    </button>
+                <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-border">
+                    <h3 id={titleId} className="text-lg font-semibold text-fg">{title}</h3>
+                    <IconButton aria-label={t("close")} size="sm" variant="ghost" onClick={onClose}>
+                        <X size={18} />
+                    </IconButton>
                 </div>
 
                 {/* Content */}
@@ -60,7 +76,7 @@ const Modal: React.FC<ModalProps> = ({
 
                 {/* Footer */}
                 {footer && (
-                    <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3 border-t border-slate-100">
+                    <div className="px-6 py-4 bg-surface-muted flex justify-end gap-3 border-t border-border">
                         {footer}
                     </div>
                 )}

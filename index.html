@@ -1,30 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="ocean">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Estrategia Desarrollo O2T</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-      }
-      /* Custom scrollbar for the diagram container if needed */
-      .diagram-scroll::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      .diagram-scroll::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-      .diagram-scroll::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-      }
-    </style>
-</head>
+    <script>
+      /* Apply the saved theme before first paint to avoid a flash of the wrong theme.
+         Mirrors readStoredTheme/applyTheme in components/src/helpers/theme.ts. */
+      (function () {
+        try {
+          var root = document.documentElement;
+          var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+          var mode = get("theme-mode");
+          if (mode !== "light" && mode !== "dark") mode = get("theme");
+          if (mode !== "light" && mode !== "dark") {
+            mode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          var palette = get("theme-palette");
+          if (["ocean", "emerald", "violet", "amber", "graphite"].indexOf(palette) < 0) palette = "ocean";
+          root.setAttribute("data-theme", palette);
+          if (mode === "dark") root.classList.add("dark");
+          root.style.colorScheme = mode;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
   <body>
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

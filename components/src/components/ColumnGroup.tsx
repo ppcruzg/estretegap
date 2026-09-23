@@ -18,6 +18,8 @@ import {
   Clock,
 } from "lucide-react";
 import DiagramNode from "../../DiagramNode";
+import { getStatusColorClasses } from "../helpers/statusColors";
+import { Button, IconButton, cn, focusRing } from "./ui";
 
 interface ColumnGroupProps {
   columns: any[];
@@ -70,14 +72,15 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
   const [openIconRow, setOpenIconRow] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ colId: string; itemId: string; label?: string } | null>(null);
 
+  // Column color ids are persisted as-is ("green" stays "green"); classes come from the shared helper.
   const colorOptions = [
-    { id: "slate", label: "Slate", tone: "bg-gradient-to-br from-slate-600 to-slate-700" },
-    { id: "blue", label: "Blue", tone: "bg-gradient-to-br from-blue-500 to-blue-700" },
-    { id: "green", label: "Green", tone: "bg-gradient-to-br from-emerald-500 to-emerald-700" },
-    { id: "orange", label: "Orange", tone: "bg-gradient-to-br from-orange-500 to-orange-700" },
-    { id: "purple", label: "Purple", tone: "bg-gradient-to-br from-purple-500 to-purple-700" },
-    { id: "pink", label: "Pink", tone: "bg-gradient-to-br from-pink-500 to-pink-700" },
-    { id: "indigo", label: "Indigo", tone: "bg-gradient-to-br from-indigo-500 to-indigo-700" },
+    { id: "slate", label: t('slate') },
+    { id: "blue", label: t('blue') },
+    { id: "green", label: t('green') },
+    { id: "orange", label: t('orange') },
+    { id: "purple", label: t('purple') },
+    { id: "pink", label: t('pink') },
+    { id: "indigo", label: t('indigo') },
   ];
 
   const defaultStatuses = [
@@ -87,13 +90,13 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
   ];
 
   const statusColorPalette = [
-    { id: "emerald", label: t('green'), tone: "bg-emerald-600" },
-    { id: "blue", label: t('blue'), tone: "bg-blue-600" },
-    { id: "rose", label: t('red'), tone: "bg-rose-600" },
-    { id: "amber", label: t('amber'), tone: "bg-amber-500" },
-    { id: "purple", label: t('purple'), tone: "bg-purple-600" },
-    { id: "slate", label: t('slate'), tone: "bg-slate-700" },
-    { id: "indigo", label: t('indigo'), tone: "bg-indigo-600" },
+    { id: "emerald", label: t('green') },
+    { id: "blue", label: t('blue') },
+    { id: "rose", label: t('red') },
+    { id: "amber", label: t('amber') },
+    { id: "purple", label: t('purple') },
+    { id: "slate", label: t('slate') },
+    { id: "indigo", label: t('indigo') },
   ];
 
   const statusIconPalette = [
@@ -295,6 +298,9 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
     setDropPreview(null);
   };
 
+  const statusFieldClasses =
+    "h-8 w-full px-2 rounded-control border border-border bg-surface text-sm text-fg outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40";
+
   const slugify = (text: string) =>
     text
       .toLowerCase()
@@ -312,7 +318,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
         {columns.map((col) => {
           const draft = columnEdits[col.id] || { title: col.title, color: col.color || "slate" };
-          const tone = colorOptions.find((c) => c.id === draft.color)?.tone || "bg-gradient-to-br from-slate-600 to-slate-700";
+          const tone = getStatusColorClasses(draft.color).solid;
           const isDragging = dragColumn === col.id;
           const isOver = colDropPreview === col.id && !isDragging;
 
@@ -324,17 +330,19 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 e.preventDefault();
               }}
               onDrop={() => handleColumnDrop(col.id)}
-              className={`group rounded-2xl border-2 shadow-lg hover:shadow-xl bg-white dark:bg-slate-900 transition-all duration-300 relative ${isDragging
-                ? "opacity-40 border-blue-400 scale-95 shadow-2xl rotate-1"
-                : isOver
-                  ? "border-blue-400 ring-4 ring-blue-100 dark:ring-blue-900/30 scale-[1.02] z-50 shadow-2xl"
-                  : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                }`}
+              className={cn(
+                "group rounded-card border bg-surface transition-all duration-300 relative",
+                isDragging
+                  ? "opacity-40 border-primary scale-95 shadow-pop rotate-1"
+                  : isOver
+                    ? "border-primary ring-4 ring-ring/25 scale-[1.02] z-50 shadow-pop"
+                    : "border-border shadow-card hover:shadow-pop hover:border-border-strong",
+              )}
             >
               {/* Overlay indicador de drop para el grupo */}
               {isOver && (
-                <div className="absolute inset-0 bg-blue-500/5 rounded-2xl flex items-center justify-center pointer-events-none z-10">
-                  <div className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-bounce flex items-center gap-2">
+                <div className="absolute inset-0 bg-primary/5 rounded-card flex items-center justify-center pointer-events-none z-10">
+                  <div className="bg-primary text-primary-fg px-4 py-2 rounded-full text-sm font-semibold shadow-pop animate-bounce flex items-center gap-2">
                     <CheckCircle size={16} />
                     {t('dropToRelocate')}
                   </div>
@@ -343,7 +351,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
               {/* ================= HEADER DEL GRUPO ================= */}
               <div
-                className={`group-header relative flex items-center justify-between p-4 text-white ${tone} shadow-md rounded-t-[14px] cursor-grab active:cursor-grabbing`}
+                className={`group-header relative flex items-center justify-between px-4 py-3.5 text-white ${tone} rounded-t-[calc(var(--radius-card)-1px)] cursor-grab active:cursor-grabbing`}
                 draggable={true}
                 onDragStart={() => handleColumnDragStart(col.id)}
                 onDragEnd={handleColumnDragEnd}
@@ -351,7 +359,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
                 {/* TÍTULO */}
                 <input
-                  className="font-bold text-lg text-white bg-transparent w-full outline-none placeholder-white/70 focus:placeholder-white/50 transition-all"
+                  className="font-bold text-base tracking-tight text-white bg-transparent w-full outline-none rounded-md px-1 -mx-1 placeholder-white/70 focus:placeholder-white/50 focus-visible:ring-2 focus-visible:ring-white/60 transition-all"
                   value={draft.title}
                   onChange={(e) => updateColumnDraft(col.id, { title: e.target.value })}
                   onBlur={() => commitColumnChanges(col.id)}
@@ -366,8 +374,10 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                       <button
                         type="button"
                         onClick={() => setOpenColorPicker(prev => prev === col.id ? null : col.id)}
-                        className="p-2 rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-110"
+                        className="p-1.5 rounded-control border border-white/25 bg-white/10 hover:bg-white/20 text-white transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                         title={t('changeColor')}
+                        aria-label={t('changeColor')}
+                        aria-expanded={openColorPicker === col.id}
                       >
                         <Palette size={18} />
                       </button>
@@ -388,21 +398,28 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                         setStatusDrafts(base);
                         setStatusModalOpen(true);
                       }}
-                      className="p-2 rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-110"
+                      className="p-1.5 rounded-control border border-white/25 bg-white/10 hover:bg-white/20 text-white transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                       title={t('configureStatus')}
+                      aria-label={t('configureStatus')}
                     >
                       <Settings size={18} />
                     </button>
 
                     {/* Picker de color */}
                     {openColorPicker === col.id && (
-                      <div className="absolute top-full right-0 mt-2 flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="absolute top-full right-0 mt-2 flex items-center gap-2 bg-surface-raised border border-border rounded-card px-3 py-2 shadow-pop z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                         {colorOptions.map(opt => (
                           <button
                             key={opt.id}
                             type="button"
-                            className={`w-8 h-8 rounded-full border-3 transition-all duration-200 hover:scale-125 ${draft.color === opt.id ? "border-slate-800 ring-2 ring-slate-300" : "border-white shadow-md"
-                              } ${opt.tone}`}
+                            className={cn(
+                              "w-7 h-7 rounded-full border-2 border-surface-raised transition-transform duration-150 hover:scale-110",
+                              focusRing,
+                              draft.color === opt.id ? "ring-2 ring-fg-muted" : "shadow-card",
+                              getStatusColorClasses(opt.id).solid,
+                            )}
+                            aria-label={opt.label}
+                            aria-pressed={draft.color === opt.id}
                             onClick={() => {
                               updateColumnDraft(col.id, { color: opt.id });
                               onUpdateColumn(col.id, { color: opt.id });
@@ -417,8 +434,9 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                     {/* BORRAR GRUPO */}
                     <button
                       onClick={() => onDeleteColumn(col.id)}
-                      className="ml-1 text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all duration-200 hover:scale-110"
+                      className="ml-1 text-white/80 hover:text-white p-1.5 rounded-control hover:bg-white/15 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                       title={t('deleteGroup')}
+                      aria-label={t('deleteGroup')}
                     >
                       <Trash size={18} />
                     </button>
@@ -434,8 +452,8 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 className="flex flex-col gap-3 p-4 min-h-[120px]"
               >
                 {col.items.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-400">
-                    <Box size={32} className="mb-2 opacity-30" />
+                  <div className="flex flex-col items-center justify-center py-8 text-fg-muted">
+                    <Box size={32} className="mb-2 opacity-40" />
                     <p className="text-sm font-medium">{t('noCards')}</p>
                     {canEdit && <p className="text-xs mt-1">{t('addFirstCard')}</p>}
                   </div>
@@ -458,7 +476,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                       dropPreview.itemId === item.id && (
                         <div
                           key={`preview-${item.id}`}
-                          className="h-3 border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/10 mb-3 rounded-lg animate-pulse"
+                          className="h-3 border-2 border-dashed border-primary bg-primary-soft mb-3 rounded-control animate-pulse"
                         />
                       )}
 
@@ -500,7 +518,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                   dropPreview.itemId === null && (
                     <div
                       key={`preview-end-${col.id}`}
-                      className="h-3 border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/10 rounded-lg animate-pulse"
+                      className="h-3 border-2 border-dashed border-primary bg-primary-soft rounded-control animate-pulse"
                     />
                   )}
               </div>
@@ -510,7 +528,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 <div className="px-4 pb-4">
                   <button
                     onClick={() => onAddItem(col.id)}
-                    className="w-full text-sm px-4 py-2.5 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-all duration-200 hover:shadow-md border border-blue-100 dark:border-blue-800 hover:border-blue-200 dark:hover:border-blue-700"
+                    className={cn("w-full text-sm h-10 px-4", "text-primary-soft-fg font-semibold bg-primary-soft border border-transparent hover:border-primary/40 rounded-control transition-colors duration-150", focusRing)}
                   >
                     {t('addCard')}
                   </button>
@@ -524,7 +542,10 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
         {canEdit && (
           <button
             onClick={onAddColumn}
-            className="min-h-[200px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 flex items-center justify-center font-semibold text-lg hover:shadow-lg"
+            className={cn(
+              "min-h-[200px] border-2 border-dashed border-border-strong rounded-card p-6 bg-surface/60 text-fg-muted hover:bg-surface hover:text-primary-soft-fg hover:border-primary transition-colors duration-200 flex items-center justify-center font-semibold text-base",
+              focusRing,
+            )}
           >
             {t('newGroup')}
           </button>
@@ -533,28 +554,30 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
       {/* ================= MODAL BORRAR TARJETA ================= */}
       {pendingDelete && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[998] animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-2xl w-full max-w-md mx-4 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-transparent dark:border-slate-800">
-            <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t('deleteCard')}</h4>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-[998] animate-in fade-in duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-card-title"
+            className="bg-surface-raised text-fg rounded-card p-6 shadow-pop w-full max-w-md mx-4 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-border"
+          >
+            <h4 id="delete-card-title" className="text-lg font-bold text-fg mb-2">{t('deleteCard')}</h4>
+            <p className="text-sm text-fg-muted leading-relaxed">
               {t('confirmDeleteCard', { label: pendingDelete.label })} {t('cannotUndo')}
             </p>
             <div className="flex justify-end gap-3 mt-6">
-              <button
-                className="px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200"
-                onClick={() => setPendingDelete(null)}
-              >
+              <Button variant="secondary" onClick={() => setPendingDelete(null)}>
                 {t('cancel')}
-              </button>
-              <button
-                className="px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 shadow-lg shadow-red-200 hover:shadow-xl transition-all duration-200"
+              </Button>
+              <Button
+                variant="danger"
                 onClick={() => {
                   onDeleteItem(pendingDelete.colId, pendingDelete.itemId);
                   setPendingDelete(null);
                 }}
               >
                 {t('delete')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -562,40 +585,45 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
       {/* ================= MODAL ESTADOS ================= */}
       {statusModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto border border-transparent dark:border-slate-800">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-in fade-in duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="status-modal-title"
+            className="bg-surface-raised text-fg rounded-card shadow-pop w-full max-w-5xl p-8 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto border border-border"
+          >
 
             {/* HEADER MODAL */}
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
               <div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t('statusCategories')}</h3>
+                <h3 id="status-modal-title" className="text-xl font-bold text-fg tracking-tight">{t('statusCategories')}</h3>
                 {statusModalColumnId && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    {t('groupLabel')}: <span className="font-semibold text-slate-700 dark:text-slate-300">{columns.find(c => c.id === statusModalColumnId)?.title}</span>
+                  <p className="text-sm text-fg-muted mt-1">
+                    {t('groupLabel')}: <span className="font-semibold text-fg">{columns.find(c => c.id === statusModalColumnId)?.title}</span>
                   </p>
                 )}
               </div>
 
-              <button
-                className="text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg p-2 transition-all duration-200"
+              <IconButton
+                aria-label={t('close')}
                 onClick={() => {
                   setStatusModalOpen(false);
                   setStatusModalColumnId(null);
                 }}
               >
-                <span className="text-2xl">×</span>
-              </button>
+                <span className="text-2xl leading-none">×</span>
+              </IconButton>
             </div>
 
             {/* ESTADOS */}
             {statusDrafts.map((s, idx) => (
               <div
                 key={s.tempId}
-                className="grid grid-cols-[0.2fr_0.4fr_0.15fr_0.15fr_auto] items-center border p-2 rounded"
+                className="grid grid-cols-[0.2fr_0.4fr_0.15fr_0.15fr_auto] items-center gap-2 border border-border bg-surface p-2 mb-2 rounded-control"
               >
                 {/* ID */}
                 <input
-                  className="border dark:border-slate-700 rounded px-1 text-sm bg-transparent dark:text-slate-100"
+                  className={statusFieldClasses}
                   placeholder="status_id"
                   value={s.status_id || ""}
                   onChange={(e) => {
@@ -607,7 +635,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
                 {/* Descripción */}
                 <input
-                  className="border dark:border-slate-700 rounded px-1 text-sm bg-transparent dark:text-slate-100"
+                  className={statusFieldClasses}
                   value={s.label}
                   onChange={(e) => {
                     const next = [...statusDrafts];
@@ -620,8 +648,8 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 <div className="relative flex justify-center">
                   <button
                     type="button"
-                    className={`w-5 h-5 rounded-full border ${statusColorPalette.find(c => c.id === s.color)?.tone
-                      }`}
+                    className={cn("w-5 h-5 rounded-full ring-1 ring-border-strong", focusRing, getStatusColorClasses(s.color).dot)}
+                    aria-label={statusColorPalette.find(c => c.id === getStatusColorClasses(s.color).name)?.label ?? String(s.color)}
                     onClick={() =>
                       setOpenColorRow(openColorRow === s.tempId ? null : s.tempId)
                     }
@@ -630,13 +658,15 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                   {openColorRow === s.tempId && (
                     <div
                       key={`color-picker-${s.tempId}`}
-                      className="absolute top-full mt-2 flex gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow z-50"
+                      className="absolute top-full mt-2 flex gap-1 bg-surface-raised border border-border rounded-control p-1.5 shadow-pop z-50"
                     >
                       {statusColorPalette.map(c => (
                         <button
                           key={c.id}
                           type="button"
-                          className={`w-5 h-5 rounded-full ${c.tone}`}
+                          className={cn("w-5 h-5 rounded-full hover:scale-110 transition-transform", focusRing, getStatusColorClasses(c.id).dot)}
+                          aria-label={c.label}
+                          title={c.label}
                           onClick={() => {
                             const next = [...statusDrafts];
                             next[idx] = { ...next[idx], color: c.id };
@@ -653,7 +683,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 <div className="relative flex justify-center">
                   <button
                     type="button"
-                    className="w-7 h-7 rounded-full border flex justify-center items-center"
+                    className={cn("w-7 h-7 rounded-full border border-border text-fg-muted flex justify-center items-center hover:bg-surface-muted", focusRing)}
                     onClick={() =>
                       setOpenIconRow(openIconRow === s.tempId ? null : s.tempId)
                     }
@@ -664,13 +694,15 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                   {openIconRow === s.tempId && (
                     <div
                       key={`icon-picker-${s.tempId}`}
-                      className="absolute top-full mt-2 flex gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow z-50"
+                      className="absolute top-full mt-2 flex gap-1 bg-surface-raised border border-border rounded-control p-1.5 shadow-pop z-50"
                     >
                       {statusIconPalette.map(i => (
                         <button
                           key={i.id}
                           type="button"
-                          className="w-7 h-7 rounded-full border dark:border-slate-700 flex justify-center items-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                          className={cn("w-7 h-7 rounded-full border border-border flex justify-center items-center text-fg-muted hover:bg-surface-muted hover:text-fg", focusRing)}
+                          aria-label={i.label}
+                          title={i.label}
                           onClick={() => {
                             const next = [...statusDrafts];
                             next[idx] = { ...next[idx], icon: i.id };
@@ -687,7 +719,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
                 {/* Eliminar */}
                 <button
-                  className="text-xs text-red-500"
+                  className="text-xs font-medium text-danger hover:underline px-1"
                   onClick={() =>
                     setStatusDrafts(statusDrafts.filter((_, i) => i !== idx))
                   }
@@ -699,7 +731,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
             {/* AGREGAR NUEVO ESTADO */}
             <button
-              className="w-full mt-4 px-4 py-3 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-all duration-200 hover:shadow-md border border-blue-100 dark:border-blue-800 hover:border-blue-200 dark:hover:border-blue-700 text-sm"
+              className={cn("w-full mt-4 h-10 px-4 text-sm", "text-primary-soft-fg font-semibold bg-primary-soft border border-transparent hover:border-primary/40 rounded-control transition-colors duration-150", focusRing)}
               onClick={() =>
                 setStatusDrafts([
                   ...statusDrafts,
@@ -721,16 +753,12 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
 
 
             {/* FOOTER MODAL */}
-            <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-              <button
-                className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200"
-                onClick={() => setStatusModalOpen(false)}
-              >
+            <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-border">
+              <Button variant="secondary" onClick={() => setStatusModalOpen(false)}>
                 {t('cancel')}
-              </button>
+              </Button>
 
-              <button
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 shadow-lg shadow-blue-200 hover:shadow-xl transition-all duration-200"
+              <Button
                 onClick={() => {
                   if (!statusModalColumnId) return;
 
@@ -760,7 +788,7 @@ const ColumnGroup: React.FC<ColumnGroupProps> = ({
                 }}
               >
                 {t('saveChanges')}
-              </button>
+              </Button>
             </div>
 
           </div>
