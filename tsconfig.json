@@ -12,7 +12,8 @@
     "skipLibCheck": true,
     "types": [
       "node",
-      "vite/client"
+      "vite/client",
+      "vitest/globals"
     ],
     "moduleResolution": "bundler",
     "isolatedModules": true,
@@ -20,9 +21,9 @@
     "allowJs": true,
     "jsx": "react-jsx",
 
-    "baseUrl": ".",               // ← ¡Este es el que faltaba!
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]            // ← esto ya lo tienes bien
+      "@/*": ["components/src/*"]
     },
 
     "allowImportingTsExtensions": true,

@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* Only scan app sources (not the untracked landing/ or docs/ folders). */
+@source not "./landing";
+@source not "./docs";
+@source not "./dist";
+
+/* Former CDN config: darkMode: 'class' (ThemeContext toggles .dark on <html>). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tailwind v3 parity: hover applied on every device, not only hover-capable ones. */
+@custom-variant hover (&:hover);
+
+/*
+ * Tailwind v3 parity for renamed scale steps. The app was written against the
+ * v3 CDN, so keep the v3 meaning of these class names.
+ */
+@theme {
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --blur-sm: 4px;
+  --default-ring-color: var(--color-blue-500);
+}
+
+/* Tailwind v3 parity for preflight defaults changed in v4. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

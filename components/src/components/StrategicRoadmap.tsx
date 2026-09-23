@@ -238,7 +238,7 @@ const ExecutiveTimeline: React.FC<ExecutiveTimelineProps> = ({ pageData }) => {
                                         </div>
 
                                         {/* Vertical dashed line connecting to the bar */}
-                                        <div className={`w-0 flex-1 border-l-2 border-dashed ${colors.line} dark:border-opacity-40 mt-2`} />
+                                        <div className={`w-0 flex-1 border-l-2 border-dashed ${colors.line} dark:opacity-40 mt-2`} />
                                     </div>
                                 );
                             })}
@@ -305,7 +305,7 @@ const ExecutiveTimeline: React.FC<ExecutiveTimelineProps> = ({ pageData }) => {
                                 return (
                                     <div key={phase.id} style={{ width: `${widthPct}%` }} className="relative flex flex-col items-center px-2">
                                         {/* Vertical dashed line connecting from the bar */}
-                                        <div className={`w-0 border-l-2 border-dashed ${colors.line} dark:border-opacity-40 mb-1`} style={{ height: '18px' }} />
+                                        <div className={`w-0 border-l-2 border-dashed ${colors.line} dark:opacity-40 mb-1`} style={{ height: '18px' }} />
 
                                         {/* Event Badge */}
                                         <div className={`${getStatusBadgeClass(phase.phaseStatus)} px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 whitespace-nowrap mb-1.5`}>
