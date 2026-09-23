@@ -2,6 +2,8 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import { X, GanttChart, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, Clock, Calendar, Flag, Activity, Sparkles } from "lucide-react";
 import { PageData, DashboardColumn, DashboardItem } from "@/types";
 import { useTranslation } from "../hooks/useTranslation";
+import { getStatusColorClasses } from "../helpers/statusColors";
+import IconButton from "./ui/IconButton";
 import {
     format,
     addDays,
@@ -88,20 +90,6 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
         return { start, end, units, timeWindow: { start, end } };
     }, [viewDate, viewMode]);
 
-    const getColorClass = (color?: string) => {
-        switch (color) {
-            case 'blue': return "from-blue-500 to-blue-700 border-blue-400 shadow-blue-500/30";
-            case 'orange': return "from-orange-500 to-orange-700 border-orange-400 shadow-orange-500/30";
-            case 'purple': return "from-purple-500 to-purple-700 border-purple-400 shadow-purple-500/30";
-            case 'green': return "from-emerald-500 to-emerald-700 border-emerald-400 shadow-emerald-500/30";
-            case 'rose':
-            case 'red': return "from-rose-500 to-rose-700 border-rose-400 shadow-rose-500/30";
-            case 'amber': return "from-amber-500 to-amber-700 border-amber-400 shadow-amber-500/30";
-            case 'indigo': return "from-indigo-500 to-indigo-700 border-indigo-400 shadow-indigo-500/30";
-            default: return "from-slate-500 to-slate-700 border-slate-400 shadow-slate-500/30";
-        }
-    };
-
     const handlePrev = () => {
         if (viewMode === 'day') setViewDate(prev => addDays(prev, -7));
         else if (viewMode === 'week') setViewDate(prev => addMonths(prev, -12));
@@ -115,6 +103,14 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
     };
 
     const handleToday = () => setViewDate(new Date());
+
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [onClose]);
 
     useEffect(() => {
         if (hasAutoCentered.current) return;
@@ -221,46 +217,34 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
         }
     };
 
-    const getStatusColorClasses = (color?: string) => {
-        switch (color) {
-            case 'emerald': return 'bg-emerald-500/20 text-emerald-700 border-emerald-300/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-800/50';
-            case 'blue': return 'bg-blue-500/20 text-blue-700 border-blue-300/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-800/50';
-            case 'rose': return 'bg-rose-500/20 text-rose-700 border-rose-300/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-800/50';
-            case 'amber': return 'bg-amber-500/20 text-amber-700 border-amber-300/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-800/50';
-            case 'purple': return 'bg-purple-500/20 text-purple-700 border-purple-300/50 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-800/50';
-            case 'indigo': return 'bg-indigo-500/20 text-indigo-700 border-indigo-300/50 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-800/50';
-            case 'cyan': return 'bg-cyan-500/20 text-cyan-700 border-cyan-300/50 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-800/50';
-            default: return 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200/50 dark:border-slate-700/50';
-        }
-    };
-
     return (
-        <div className="fixed inset-0 z-[3000] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="relative w-full h-[95vh] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[3000] bg-overlay backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+            <div role="dialog" aria-modal="true" aria-label={t('viewGantt')} className="relative w-full h-[95vh] bg-surface text-fg border border-border rounded-[2.5rem] shadow-pop overflow-hidden flex flex-col">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 z-10 transition-colors">
+                <div className="flex items-center justify-between px-8 py-6 border-b border-border bg-surface z-10 transition-colors">
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-emerald-600 rounded-[1.25rem] flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-                            <GanttChart className="text-white" size={28} />
+                        <div className="w-14 h-14 bg-primary text-primary-fg rounded-[1.25rem] flex items-center justify-center shadow-pop">
+                            <GanttChart size={28} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{t('viewGantt')}</h2>
-                            <p className="text-[10px] text-slate-400 font-black tracking-[0.2em] uppercase mt-1">{pageData.pageConfig.title}</p>
+                            <h2 className="text-2xl font-black text-fg uppercase tracking-tighter leading-none">{t('viewGantt')}</h2>
+                            <p className="text-[11px] text-fg-muted font-black tracking-[0.2em] uppercase mt-1">{pageData.pageConfig.title}</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-6">
                         {/* Selector de Modo Premium */}
-                        <div className="flex items-center bg-slate-100 dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center bg-surface-muted rounded-2xl p-1.5 border border-border">
                             {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
                                 <button
                                     key={mode}
                                     onClick={() => setViewMode(mode)}
-                                    className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all
+                                    aria-pressed={viewMode === mode}
+                                    className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-control transition-all
                                         ${viewMode === mode
-                                            ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-[0_4px_12px_rgba(0,0,0,0.05)] scale-105'
-                                            : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}
+                                            ? 'bg-surface text-primary shadow-card scale-105'
+                                            : 'text-fg-muted hover:text-fg'}
                                     `}
                                 >
                                     {mode === 'day' ? 'Día' : mode === 'week' ? 'Semana' : 'Mes'}
@@ -269,49 +253,49 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                         </div>
 
                         {/* Navegación Temporal */}
-                        <div className="flex items-center bg-slate-100 dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800">
-                            <button onClick={handlePrev} className="p-2.5 hover:bg-white dark:hover:bg-slate-800 rounded-xl text-slate-500 transition-all active:scale-95"><ChevronLeft size={20} /></button>
+                        <div className="flex items-center bg-surface-muted rounded-2xl p-1.5 border border-border">
+                            <button onClick={handlePrev} aria-label={t('previous')} title={t('previous')} className="p-2.5 hover:bg-surface rounded-control text-fg-muted hover:text-fg transition-all active:scale-95"><ChevronLeft size={20} /></button>
                             <div className="px-6 flex flex-col items-center min-w-[200px]">
-                                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                                <span className="text-xs font-black text-fg uppercase tracking-widest">
                                     {viewMode === 'day' && `${format(timelineData.start, "d MMM")} - ${format(timelineData.end, "d MMM")}`}
                                     {viewMode === 'week' && `Año ${format(viewDate, "yyyy")}`}
                                     {viewMode === 'month' && `${format(timelineData.start, "MMM yyyy", { locale: es })} - ${format(timelineData.end, "MMM yyyy", { locale: es })}`}
                                 </span>
                             </div>
-                            <button onClick={handleNext} className="p-2.5 hover:bg-white dark:hover:bg-slate-800 rounded-xl text-slate-500 transition-all active:scale-95"><ChevronRight size={20} /></button>
+                            <button onClick={handleNext} aria-label={t('next')} title={t('next')} className="p-2.5 hover:bg-surface rounded-control text-fg-muted hover:text-fg transition-all active:scale-95"><ChevronRight size={20} /></button>
                         </div>
 
-                        <button onClick={handleToday} className="px-6 py-3 bg-slate-50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm active:scale-95">
+                        <button onClick={handleToday} className="px-6 py-3 bg-surface border border-border text-fg-muted hover:text-fg text-xs font-black uppercase tracking-widest rounded-control hover:bg-surface-muted transition-all shadow-card active:scale-95">
                             HOY
                         </button>
 
                         <button
                             onClick={handleCenterOnTasks}
-                            className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                            className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-fg text-xs font-black uppercase tracking-widest rounded-control hover:bg-primary-hover transition-all shadow-card active:scale-95"
                         >
                             <Sparkles size={14} />
                             IR A TAREAS
                         </button>
 
-                        <div className="w-px h-10 bg-slate-100 dark:bg-slate-800" />
+                        <div className="w-px h-10 bg-border" />
 
-                        <button onClick={onClose} className="p-3.5 bg-slate-100 dark:bg-slate-900 hover:bg-rose-500 hover:text-white text-slate-500 rounded-2xl transition-all active:scale-90 group">
+                        <IconButton aria-label={t('close')} variant="danger" onClick={onClose} className="h-12 w-12 bg-surface-muted group">
                             <X size={20} className="transition-transform group-hover:rotate-90" />
-                        </button>
+                        </IconButton>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-hidden flex bg-white dark:bg-slate-950">
+                <div className="flex-1 overflow-hidden flex bg-surface">
 
                     {/* Sidebar */}
-                    <div className="w-[240px] border-r border-slate-100 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-950 z-20 shadow-[20px_0_40px_rgba(0,0,0,0.02)]">
-                        <div className="h-[72px] border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-8">
+                    <div className="w-[240px] border-r border-border flex flex-col bg-surface z-20 shadow-card">
+                        <div className="h-[72px] border-b border-border flex items-center justify-between px-8">
                             <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-400 mr-3">
+                                <div className="w-8 h-8 rounded-control bg-surface-muted flex items-center justify-center text-fg-subtle mr-3">
                                     <Calendar size={16} />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Estructura</span>
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-fg-muted">Estructura</span>
                             </div>
 
                             {/* Summary count */}
@@ -319,9 +303,9 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                 const total = flatItems.filter(i => i.type === 'item').length;
                                 const withDate = flatItems.filter(i => i.type === 'item' && (i.date || (i as any).due_date || (i as any).finish_date)).length;
                                 return (
-                                    <div className="flex items-center gap-1.5 opacity-60">
-                                        <Activity size={10} className="text-emerald-500" />
-                                        <span className="text-[9px] font-black tabular-nums">{withDate}/{total}</span>
+                                    <div className="flex items-center gap-1.5 text-fg-muted">
+                                        <Activity size={10} className="text-success" />
+                                        <span className="text-[11px] font-black tabular-nums">{withDate}/{total}</span>
                                     </div>
                                 );
                             })()}
@@ -337,35 +321,27 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                     key={item.id + idx}
                                     className={`h-16 flex items-center px-8 border-b border-transparent transition-all
                                         ${item.type === 'column'
-                                            ? 'bg-slate-100 dark:bg-slate-800/80 mt-2 first:mt-0 font-black border-y border-slate-200 dark:border-slate-700'
-                                            : 'hover:bg-slate-50/50 dark:hover:bg-slate-900/20'}
+                                            ? 'bg-surface-muted mt-2 first:mt-0 font-black border-y border-border'
+                                            : 'hover:bg-surface-muted/50'}
                                     `}
                                 >
                                     {item.type === 'column' ? (
                                         <div className="flex items-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
-                                            <span className="text-[11px] uppercase tracking-widest text-slate-400 truncate">{item.title}</span>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${getStatusColorClasses(item.color).dot}`} />
+                                            <span className="text-[11px] uppercase tracking-widest text-fg-muted truncate">{item.title}</span>
                                         </div>
                                     ) : (
                                         <div className="flex flex-col min-w-0 flex-1">
                                             <div className="flex items-center gap-2 overflow-hidden">
-                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300 truncate leading-tight flex-shrink-0">{item.label}</span>
+                                                <span className="text-sm font-bold text-fg truncate leading-tight flex-shrink-0">{item.label}</span>
                                                 {item.status && (
                                                     <div
-                                                        className={`w-2 h-2 rounded-full shrink-0 ${item.statusColor === 'emerald' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' :
-                                                            item.statusColor === 'rose' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' :
-                                                                item.statusColor === 'blue' ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]' :
-                                                                    item.statusColor === 'amber' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]' :
-                                                                        item.statusColor === 'purple' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.4)]' :
-                                                                            item.statusColor === 'indigo' ? 'bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.4)]' :
-                                                                                item.statusColor === 'cyan' ? 'bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]' :
-                                                                                    'bg-slate-400'
-                                                            }`}
+                                                        className={`w-2 h-2 rounded-full shrink-0 ${getStatusColorClasses(item.statusColor).dot}`}
                                                     />
                                                 )}
                                             </div>
                                             {item.date && (
-                                                <span className="text-[9px] text-slate-400 font-medium tabular-nums mt-0.5">
+                                                <span className="text-[11px] text-fg-subtle font-medium tabular-nums mt-0.5">
                                                     📅 {String(item.date).substring(0, 10)}
                                                 </span>
                                             )}
@@ -380,7 +356,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                     <div className="flex-1 flex flex-col overflow-hidden relative">
 
                         {/* Timeline Header Units */}
-                        <div className="h-[72px] border-b border-slate-100 dark:border-slate-800 flex bg-white dark:bg-slate-950 z-10 overflow-x-auto no-scrollbar scroll-smooth"
+                        <div className="h-[72px] border-b border-border flex bg-surface z-10 overflow-x-auto no-scrollbar scroll-smooth"
                             style={{ scrollbarWidth: 'none' }}>
                             <div className="flex h-full" style={{ width: `${timelineData.units.length * (viewMode === 'day' ? 120 : viewMode === 'week' ? 60 : 180)}px` }}>
                                 {timelineData.units.map((unit, idx) => {
@@ -403,16 +379,16 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                     return (
                                         <div
                                             key={idx}
-                                            className={`shrink-0 ${viewMode === 'day' ? 'w-[120px]' : viewMode === 'week' ? 'w-[60px]' : 'w-[180px]'} border-r border-slate-50 dark:border-slate-800 flex flex-col items-center justify-center transition-colors
-                                                ${unit.isToday ? 'bg-emerald-500/[0.04]' : ''}
+                                            className={`shrink-0 ${viewMode === 'day' ? 'w-[120px]' : viewMode === 'week' ? 'w-[60px]' : 'w-[180px]'} border-r border-border flex flex-col items-center justify-center transition-colors
+                                                ${unit.isToday ? 'bg-primary-soft' : ''}
                                             `}
                                         >
-                                            <span className={`text-[9px] font-black uppercase tracking-widest ${unit.isToday ? 'text-emerald-500' : 'text-slate-400'}`}>{unit.label}</span>
-                                            <span className={`text-sm font-black mt-1 ${unit.isToday ? 'text-emerald-600 dark:text-emerald-400 scale-110' : 'text-slate-900 dark:text-slate-100'}`}>
+                                            <span className={`text-[11px] font-black uppercase tracking-widest ${unit.isToday ? 'text-primary-soft-fg' : 'text-fg-muted'}`}>{unit.label}</span>
+                                            <span className={`text-sm font-black mt-1 ${unit.isToday ? 'text-primary-soft-fg scale-110' : 'text-fg'}`}>
                                                 {unit.subLabel}
                                             </span>
                                             {hasItemsHere && (
-                                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse" />
+                                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                                             )}
                                         </div>
                                     );
@@ -422,7 +398,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
 
                         {/* Grid Rows */}
                         <div
-                            className="flex-1 overflow-auto bg-white dark:bg-slate-950 relative"
+                            className="flex-1 overflow-auto bg-surface relative"
                             ref={timelineRef}
                             onScroll={(e) => {
                                 handleScroll(e, sidebarRef);
@@ -435,7 +411,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                 {/* Vertical Lines & Today Indicator */}
                                 <div className="absolute inset-0 flex pointer-events-none">
                                     {timelineData.units.map((unit, i) => (
-                                        <div key={i} className={`h-full border-r border-slate-50 dark:border-slate-900/40 shrink-0 ${unit.isToday ? 'bg-emerald-500/5 dark:bg-emerald-500/10 border-x-2 border-x-emerald-500/20' : ''}`}
+                                        <div key={i} className={`h-full border-r border-border/60 shrink-0 ${unit.isToday ? 'bg-primary-soft/60 border-x-2 border-x-primary/20' : ''}`}
                                             style={{ width: `${viewMode === 'day' ? 120 : viewMode === 'week' ? 60 : 180}px` }} />
                                     ))}
                                 </div>
@@ -443,7 +419,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                 {/* Today Line (Global) */}
                                 {timelineData.units.some(u => u.isToday) && (
                                     <div
-                                        className="absolute top-0 bottom-0 w-[4px] bg-rose-500 z-[30] pointer-events-none shadow-[0_0_20px_rgba(244,63,94,0.6)]"
+                                        className="absolute top-0 bottom-0 w-[4px] bg-danger z-[30] pointer-events-none shadow-pop"
                                         style={{
                                             left: `${timelineData.units.findIndex(u => u.isToday) * (viewMode === 'day' ? 120 : viewMode === 'week' ? 60 : 180)}px`,
                                             marginLeft: `${(viewMode === 'day' ? 120 : viewMode === 'week' ? 60 : 180) / 2}px`
@@ -454,7 +430,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                 {/* Data Rows Container */}
                                 <div className="relative pt-4">
                                     {flatItems.map((item, idx) => (
-                                        <div key={item.id + idx + '-row'} className={`h-16 flex relative border-b border-slate-50/50 dark:border-slate-900/20 group transition-colors ${item.type === 'column' ? 'bg-slate-100/50 dark:bg-slate-800/40 border-y border-slate-200/50 dark:border-slate-700/50' : ''}`}>
+                                        <div key={item.id + idx + '-row'} className={`h-16 flex relative border-b border-border/40 group transition-colors ${item.type === 'column' ? 'bg-surface-muted/60 border-y border-border' : ''}`}>
                                             {item.type === 'item' && (item.date || (item as any).due_date || (item as any).finish_date) && (() => {
                                                 const itemRawDate = item.date || (item as any).due_date || (item as any).finish_date;
                                                 const itemDate = safeParseDate(itemRawDate);
@@ -471,10 +447,10 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                                 return (
                                                     <>
                                                         <div
-                                                            className={`absolute top-[10px] bottom-[10px] rounded-xl border-[3px] z-[100] flex items-center px-4 shadow-2xl transition-all hover:scale-[1.05] hover:z-[200] cursor-pointer
-                                                                bg-gradient-to-br ${getColorClass(item.color)} text-white border-white/60 dark:border-white/40
-                                                                ${item.status === 'bloqueado' ? 'ring-4 ring-rose-500/30 animate-pulse' : ''}
-                                                                ${item.status === 'completado' ? 'ring-4 ring-emerald-500/30' : ''}
+                                                            className={`absolute top-[10px] bottom-[10px] rounded-xl border-[3px] z-[100] flex items-center px-4 shadow-pop transition-all hover:scale-[1.05] hover:z-[200] cursor-pointer
+                                                                ${getStatusColorClasses(item.color).solid} text-white border-white/60 dark:border-white/40
+                                                                ${item.status === 'bloqueado' ? 'ring-4 ring-danger/30 animate-pulse' : ''}
+                                                                ${item.status === 'completado' ? 'ring-4 ring-success/30' : ''}
                                                             `}
                                                             style={{
                                                                 left: `${offsetPx}px`,
@@ -487,12 +463,12 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
 
                                                             <div className="relative flex items-center gap-3 w-full min-w-0">
                                                                 {item.status === 'bloqueado' ? (
-                                                                    <div className="w-6 h-6 bg-rose-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg">
-                                                                        <AlertTriangle size={14} className="text-white" />
+                                                                    <div className="w-6 h-6 bg-danger text-danger-fg rounded-lg flex items-center justify-center shrink-0 shadow-card">
+                                                                        <AlertTriangle size={14} />
                                                                     </div>
                                                                 ) : item.status === 'completado' ? (
-                                                                    <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg">
-                                                                        <CheckCircle2 size={14} className="text-white" />
+                                                                    <div className={`w-6 h-6 ${getStatusColorClasses('emerald').dot} text-white rounded-lg flex items-center justify-center shrink-0 shadow-card`}>
+                                                                        <CheckCircle2 size={14} />
                                                                     </div>
                                                                 ) : (
                                                                     <div className="w-6 h-6 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center shrink-0">
@@ -502,7 +478,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
 
                                                                 <div className="flex flex-col min-w-0 leading-none">
                                                                     <span className="text-[11px] font-black truncate uppercase tracking-tight">{item.label}</span>
-                                                                    <span className="text-[9px] opacity-70 font-bold mt-1 uppercase tracking-widest tabular-nums flex items-center gap-1">
+                                                                    <span className="text-[11px] opacity-80 font-bold mt-1 uppercase tracking-widest tabular-nums flex items-center gap-1">
                                                                         <Calendar size={10} />
                                                                         {format(itemDate, "d MMM", { locale: es })}
                                                                     </span>
@@ -513,7 +489,7 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                                             {item.progress > 0 && (
                                                                 <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/10">
                                                                     <div
-                                                                        className={`h-full transition-all duration-1000 ease-out ${item.progress === 100 ? 'bg-emerald-400' : 'bg-white/60'}`}
+                                                                        className={`h-full transition-all duration-1000 ease-out ${item.progress === 100 ? getStatusColorClasses('emerald').dot : 'bg-white/60'}`}
                                                                         style={{ width: `${item.progress}%` }}
                                                                     />
                                                                 </div>
@@ -529,12 +505,12 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                                                                     maxWidth: '800px'
                                                                 }}
                                                             >
-                                                                <div className="flex items-center gap-3 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-xl border border-slate-200/50 dark:border-slate-800/50 transition-all group-hover:scale-105">
-                                                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 italic font-bold group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                                                                <div className="flex items-center gap-3 bg-surface-raised/85 backdrop-blur-md px-3 py-1.5 rounded-control shadow-pop border border-border transition-all group-hover:scale-105">
+                                                                    <span className="text-[11px] text-fg-muted italic font-bold group-hover:text-fg transition-colors">
                                                                         {item.description}
                                                                     </span>
                                                                     {item.status && (
-                                                                        <span className={`px-2.5 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter shadow-sm border ${getStatusColorClasses(item.statusColor)}`}>
+                                                                        <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-black uppercase tracking-tighter border ${getStatusColorClasses(item.statusColor).badge}`}>
                                                                             {item.statusLabel}
                                                                         </span>
                                                                     )}
@@ -553,26 +529,26 @@ const GanttPanel: React.FC<GanttPanelProps> = ({ pageData, onClose }) => {
                 </div>
 
                 {/* Footer Dashboard */}
-                <div className="px-10 py-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
+                <div className="px-10 py-5 bg-surface-muted border-t border-border flex justify-between items-center z-10">
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-3 group">
-                            <div className="w-3 h-3 bg-rose-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.5)]" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-hover:text-rose-500 transition-colors">Estado Crítico</span>
+                            <div className="w-3 h-3 bg-danger rounded-full animate-pulse" />
+                            <span className="text-[11px] font-black uppercase tracking-widest text-fg-muted group-hover:text-danger transition-colors">Estado Crítico</span>
                         </div>
                         <div className="flex items-center gap-3 group">
-                            <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_4px_12px_rgba(16,185,129,0.3)]" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-hover:text-emerald-500 transition-colors">Terminado</span>
+                            <div className="w-3 h-3 bg-success rounded-full" />
+                            <span className="text-[11px] font-black uppercase tracking-widest text-fg-muted group-hover:text-success transition-colors">Terminado</span>
                         </div>
                         <div className="flex items-center gap-3 group">
-                            <div className="w-3 h-3 bg-blue-600 rounded-full shadow-[0_4px_12px_rgba(37,99,235,0.3)]" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors">Activo</span>
+                            <div className={`w-3 h-3 ${getStatusColorClasses('blue').dot} rounded-full`} />
+                            <span className="text-[11px] font-black uppercase tracking-widest text-fg-muted group-hover:text-fg transition-colors">Activo</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <Activity size={12} className="text-emerald-500 animate-pulse" />
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estratega TimeSync™ v1.5</span>
+                        <div className="flex items-center gap-2 px-4 py-2 bg-surface rounded-full border border-border shadow-card">
+                            <Activity size={12} className="text-success animate-pulse" />
+                            <span className="text-[11px] font-black text-fg-muted uppercase tracking-widest">Estratega TimeSync™ v1.5</span>
                         </div>
                     </div>
                 </div>

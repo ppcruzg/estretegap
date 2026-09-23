@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { buttonClasses } from "../ui";
 
 export const RequireSuperAdmin = ({ children }: { children: ReactNode }) => {
   const { loading, isRoleLoading, isSuperAdmin, companyRole } = useAuth();
@@ -10,10 +11,10 @@ export const RequireSuperAdmin = ({ children }: { children: ReactNode }) => {
 
   if (isStillVerifying) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-slate-500 font-medium">Verificando permisos...</span>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-fg-muted font-medium">Verificando permisos...</span>
         </div>
       </div>
     );
@@ -27,11 +28,11 @@ export const RequireSuperAdmin = ({ children }: { children: ReactNode }) => {
 
   if (!canAccess) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-sm">
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Acceso denegado</h2>
-          <p className="text-slate-500 mb-6">No tienes permisos para acceder a esta sección de administración.</p>
-          <a href="/" className="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all">
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-surface p-8 rounded-card shadow-card border border-border max-w-sm">
+          <h2 className="text-xl font-bold text-fg mb-2">Acceso denegado</h2>
+          <p className="text-fg-muted mb-6">No tienes permisos para acceder a esta sección de administración.</p>
+          <a href="/" className={buttonClasses("primary", "md")}>
             Volver al inicio
           </a>
         </div>

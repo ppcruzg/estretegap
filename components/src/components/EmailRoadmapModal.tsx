@@ -3,6 +3,9 @@ import { X, Mail, Loader2, Send, UserPlus } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { exportRoadmapToPDF } from "../services/pdfExportService";
 import type { RoadmapAnalysis } from "@/types/roadmapTypes";
+import { useTranslation } from "../hooks/useTranslation";
+import IconButton from "./ui/IconButton";
+import { buttonClasses } from "./ui";
 
 interface EmailRoadmapModalProps {
     analysis: RoadmapAnalysis;
@@ -25,10 +28,19 @@ const EmailRoadmapModal: React.FC<EmailRoadmapModalProps> = ({
     const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
     const [customEmail, setCustomEmail] = useState("");
     const [message, setMessage] = useState("");
+    const { t } = useTranslation();
 
     useEffect(() => {
         loadCompanyUsers();
     }, []);
+
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [onClose]);
 
     const loadCompanyUsers = async () => {
         setLoading(true);
@@ -140,55 +152,52 @@ Nota: El PDF se descargará automáticamente.`);
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-[1000] p-4">
+            <div role="dialog" aria-modal="true" aria-labelledby="email-roadmap-title" className="bg-surface-raised text-fg border border-border rounded-card shadow-pop w-full max-w-2xl max-h-[80vh] flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                <div className="flex items-center justify-between p-6 border-b border-border">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
-                            <Mail className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 bg-primary text-primary-fg rounded-control flex items-center justify-center shadow-card">
+                            <Mail className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-900">Enviar Roadmap por Correo</h2>
-                            <p className="text-sm text-slate-500">Compartir con miembros del equipo</p>
+                            <h2 id="email-roadmap-title" className="text-xl font-bold text-fg">Enviar Roadmap por Correo</h2>
+                            <p className="text-sm text-fg-muted">Compartir con miembros del equipo</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-slate-100 rounded-lg transition-all"
-                    >
-                        <X size={20} className="text-slate-500" />
-                    </button>
+                    <IconButton aria-label={t("close")} onClick={onClose}>
+                        <X size={20} />
+                    </IconButton>
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
                         </div>
                     ) : (
                         <>
                             {/* Usuarios de la empresa */}
                             <div className="mb-6">
-                                <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                                <h3 className="text-sm font-semibold text-fg mb-3">
                                     Miembros del Equipo
                                 </h3>
                                 <div className="space-y-2">
                                     {companyUsers.map((user) => (
                                         <label
                                             key={user.id}
-                                            className="flex items-center gap-3 p-3 border-2 border-slate-200 rounded-lg hover:border-blue-300 cursor-pointer transition-all"
+                                            className="flex items-center gap-3 p-3 border border-border bg-surface rounded-control hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary-soft cursor-pointer transition-all"
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={selectedEmails.includes(user.email)}
                                                 onChange={() => toggleEmail(user.email)}
-                                                className="w-4 h-4 text-blue-600 rounded"
+                                                className="w-4 h-4 accent-primary rounded"
                                             />
                                             <div className="flex-1">
-                                                <p className="text-sm font-medium text-slate-900">{user.name || "Sin nombre"}</p>
-                                                <p className="text-xs text-slate-500">{user.email}</p>
+                                                <p className="text-sm font-medium text-fg">{user.name || "Sin nombre"}</p>
+                                                <p className="text-xs text-fg-muted">{user.email}</p>
                                             </div>
                                         </label>
                                     ))}
@@ -197,7 +206,7 @@ Nota: El PDF se descargará automáticamente.`);
 
                             {/* Agregar email personalizado */}
                             <div className="mb-6">
-                                <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                                <h3 className="text-sm font-semibold text-fg mb-3">
                                     Agregar Destinatario
                                 </h3>
                                 <div className="flex gap-2">
@@ -207,33 +216,37 @@ Nota: El PDF se descargará automáticamente.`);
                                         onChange={(e) => setCustomEmail(e.target.value)}
                                         onKeyDown={(e) => e.key === "Enter" && addCustomEmail()}
                                         placeholder="correo@ejemplo.com"
-                                        className="flex-1 px-4 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none"
+                                        className="flex-1 px-4 py-2 border border-border bg-surface text-fg rounded-control text-sm hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
                                     />
-                                    <button
+                                    <IconButton
+                                        aria-label={t("addRecipient")}
+                                        variant="secondary"
                                         onClick={addCustomEmail}
-                                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-all"
+                                        className="h-10 w-10"
                                     >
                                         <UserPlus size={16} />
-                                    </button>
+                                    </IconButton>
                                 </div>
                             </div>
 
                             {/* Emails seleccionados */}
                             {selectedEmails.length > 0 && (
                                 <div className="mb-6">
-                                    <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                                    <h3 className="text-sm font-semibold text-fg mb-3">
                                         Destinatarios ({selectedEmails.length})
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {selectedEmails.map((email) => (
                                             <span
                                                 key={email}
-                                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium flex items-center gap-2"
+                                                className="px-3 py-1 bg-primary-soft text-primary-soft-fg rounded-full text-xs font-medium flex items-center gap-2"
                                             >
                                                 {email}
                                                 <button
                                                     onClick={() => toggleEmail(email)}
-                                                    className="hover:text-blue-900"
+                                                    aria-label={t("removeRecipient", { email })}
+                                                    title={t("removeRecipient", { email })}
+                                                    className="rounded-full hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                                 >
                                                     <X size={12} />
                                                 </button>
@@ -245,7 +258,7 @@ Nota: El PDF se descargará automáticamente.`);
 
                             {/* Mensaje opcional */}
                             <div>
-                                <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                                <h3 className="text-sm font-semibold text-fg mb-3">
                                     Mensaje (Opcional)
                                 </h3>
                                 <textarea
@@ -253,7 +266,7 @@ Nota: El PDF se descargará automáticamente.`);
                                     onChange={(e) => setMessage(e.target.value)}
                                     placeholder="Agrega un mensaje personalizado..."
                                     rows={4}
-                                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none resize-none"
+                                    className="w-full px-4 py-3 border border-border bg-surface text-fg rounded-control text-sm hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors resize-none"
                                 />
                             </div>
                         </>
@@ -261,21 +274,21 @@ Nota: El PDF se descargará automáticamente.`);
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-                    <p className="text-xs text-slate-500">
+                <div className="p-6 border-t border-border bg-surface-muted rounded-b-card flex items-center justify-between">
+                    <p className="text-xs text-fg-muted">
                         Se descargará el PDF y se abrirá tu cliente de correo
                     </p>
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-slate-700 hover:bg-slate-200 rounded-lg transition-all font-medium"
+                            className={buttonClasses("ghost", "md")}
                         >
                             Cancelar
                         </button>
                         <button
                             onClick={handleSendEmail}
                             disabled={sending || selectedEmails.length === 0}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={buttonClasses("primary", "md")}
                         >
                             {sending ? (
                                 <Loader2 size={16} className="animate-spin" />

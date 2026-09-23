@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useId } from "react";
+import { buttonClasses } from "./ui";
 
 interface ConfirmDangerModalProps {
   open: boolean;
@@ -17,26 +18,37 @@ const ConfirmDangerModal: React.FC<ConfirmDangerModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [open, onCancel]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-red-600">{title}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay backdrop-blur-sm">
+      <div role="alertdialog" aria-modal="true" aria-labelledby={titleId} className="bg-surface-raised text-fg border border-border rounded-card shadow-pop w-full max-w-md p-6">
+        <h2 id={titleId} className="text-lg font-semibold text-danger">{title}</h2>
 
-        <p className="mt-3 text-sm text-gray-700">{description}</p>
+        <p className="mt-3 text-sm text-fg-muted">{description}</p>
 
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm rounded border"
+            className={buttonClasses("secondary", "md")}
           >
             Cancelar
           </button>
 
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-sm rounded bg-red-600 text-white"
+            className={buttonClasses("danger", "md")}
           >
             {confirmText}
           </button>

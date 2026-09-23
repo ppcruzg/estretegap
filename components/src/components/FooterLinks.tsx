@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ExternalLink, Trash2, FileText, Plus, Edit3, BookOpen } from "lucide-react";
 import { useTranslation } from "../hooks/useTranslation";
+import { buttonClasses } from "./ui";
 
 interface FooterLink {
   id: string;
@@ -60,18 +61,18 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
   };
 
   return (
-    <div className="border-t-2 border-slate-300 dark:border-slate-800 pt-6 mt-8 bg-gradient-to-b from-slate-100/50 to-transparent dark:from-slate-900/50 dark:to-transparent rounded-t-2xl transition-colors">
+    <div className="border-t-2 border-border-strong pt-6 mt-8 bg-gradient-to-b from-surface-muted/60 to-transparent rounded-t-card transition-colors">
       {/* Header Section */}
       <div className="flex items-center justify-between mb-6 px-2">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-            < BookOpen className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-primary text-primary-fg rounded-control flex items-center justify-center shadow-card">
+            <BookOpen className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-lg font-bold text-fg">
               {t('docAndLinks')}
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-fg-muted">
               {t('docSub')}
             </p>
           </div>
@@ -80,7 +81,7 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
         <button
           type="button"
           onClick={startCreate}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-xl hover:scale-105"
+          className={buttonClasses("primary", "md")}
         >
           <Plus size={16} />
           {t('addLink')}
@@ -90,16 +91,16 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {/* NUEVO LINK */}
         {editingId === "NEW" && (
-          <div className="group rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 p-5 flex flex-col gap-3 shadow-lg hover:shadow-xl dark:shadow-none transition-all duration-300 animate-in fade-in zoom-in-95">
+          <div className="group rounded-card border-2 border-primary/40 bg-surface p-5 flex flex-col gap-3 shadow-pop transition-all duration-300 animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 rounded-lg flex items-center justify-center">
-                <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <div className="w-8 h-8 bg-primary-soft rounded-control flex items-center justify-center">
+                <FileText className="w-4 h-4 text-primary-soft-fg" />
               </div>
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('newLink')}</span>
+              <span className="text-sm font-semibold text-fg">{t('newLink')}</span>
             </div>
 
             <input
-              className="text-sm font-medium border-2 border-slate-200 dark:border-slate-800 bg-transparent dark:text-slate-100 rounded-lg px-3 py-2 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 outline-none transition-all"
+              className="text-sm font-medium border border-border bg-surface text-fg rounded-control px-3 py-2 hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
               placeholder={t('titlePlaceholder')}
               value={draft.title || ""}
               onChange={(e) =>
@@ -108,7 +109,7 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
             />
 
             <input
-              className="text-sm border-2 border-slate-200 dark:border-slate-800 bg-transparent dark:text-slate-100 rounded-lg px-3 py-2 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 outline-none transition-all"
+              className="text-sm border border-border bg-surface text-fg rounded-control px-3 py-2 hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
               placeholder="https://..."
               value={draft.url || ""}
               onChange={(e) =>
@@ -117,7 +118,7 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
             />
 
             <textarea
-              className="text-sm border-2 border-slate-200 dark:border-slate-800 bg-transparent dark:text-slate-100 rounded-lg px-3 py-2 resize-none focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 outline-none transition-all"
+              className="text-sm border border-border bg-surface text-fg rounded-control px-3 py-2 resize-none hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
               rows={3}
               placeholder={t('addDescription')}
               value={draft.description || ""}
@@ -129,14 +130,14 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
             <div className="flex justify-end gap-2 mt-2">
               <button
                 type="button"
-                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-200"
+                className={buttonClasses("ghost", "md")}
                 onClick={resetEdit}
               >
                 {t('cancel')}
               </button>
               <button
                 type="button"
-                className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                className={buttonClasses("primary", "md")}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -156,22 +157,22 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
           return (
             <div
               key={link.id}
-              className={`group rounded-xl border-2 bg-white dark:bg-slate-900 p-5 flex flex-col gap-3 transition-all duration-300 ${isEditing
-                ? "border-indigo-300 dark:border-indigo-500 shadow-xl dark:shadow-none scale-105"
-                : "border-slate-200 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 shadow-md hover:shadow-lg dark:hover:shadow-none hover:scale-102"
+              className={`group rounded-card border bg-surface p-5 flex flex-col gap-3 transition-all duration-300 ${isEditing
+                ? "border-primary/50 shadow-pop scale-105"
+                : "border-border hover:border-primary/40 shadow-card hover:shadow-pop hover:scale-102"
                 }`}
             >
               {isEditing ? (
                 <>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 rounded-lg flex items-center justify-center">
-                      <Edit3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <div className="w-8 h-8 bg-primary-soft rounded-control flex items-center justify-center">
+                      <Edit3 className="w-4 h-4 text-primary-soft-fg" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('editing')}</span>
+                    <span className="text-sm font-semibold text-fg">{t('editing')}</span>
                   </div>
 
                   <input
-                    className="text-sm font-medium border-2 border-slate-200 dark:border-slate-800 bg-transparent dark:text-slate-100 rounded-lg px-3 py-2 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 outline-none transition-all"
+                    className="text-sm font-medium border border-border bg-surface text-fg rounded-control px-3 py-2 hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
                     value={draft.title || ""}
                     onChange={(e) =>
                       setDraft({ ...draft, title: e.target.value })
@@ -179,7 +180,7 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
                   />
 
                   <input
-                    className="text-sm border-2 border-slate-200 dark:border-slate-800 bg-transparent dark:text-slate-100 rounded-lg px-3 py-2 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 outline-none transition-all"
+                    className="text-sm border border-border bg-surface text-fg rounded-control px-3 py-2 hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
                     value={draft.url || ""}
                     onChange={(e) =>
                       setDraft({ ...draft, url: e.target.value })
@@ -187,7 +188,7 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
                   />
 
                   <textarea
-                    className="text-sm border-2 border-slate-200 dark:border-slate-800 bg-transparent dark:text-slate-100 rounded-lg px-3 py-2 resize-none focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 outline-none transition-all"
+                    className="text-sm border border-border bg-surface text-fg rounded-control px-3 py-2 resize-none hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40 outline-none transition-colors"
                     rows={3}
                     value={draft.description || ""}
                     onChange={(e) =>
@@ -195,10 +196,10 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
                     }
                   />
 
-                  <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center mt-2 pt-3 border-t border-border">
                     <button
                       type="button"
-                      className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1.5 rounded-lg transition-all duration-200"
+                      className="flex items-center gap-1.5 text-sm font-medium text-danger hover:bg-danger-soft px-3 py-1.5 rounded-control transition-colors duration-200"
                       onClick={async () => {
                         await onDelete(link.id);
                         resetEdit();
@@ -210,14 +211,14 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-200"
+                        className={buttonClasses("ghost", "md")}
                         onClick={resetEdit}
                       >
                         {t('cancel')}
                       </button>
                       <button
                         type="button"
-                        className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                        className={buttonClasses("primary", "md")}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -239,27 +240,27 @@ const FooterLinks: React.FC<FooterLinksProps> = ({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 flex-1">
-                        <div className="w-9 h-9 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/40 dark:to-indigo-800/40 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-indigo-100 group-hover:to-indigo-200 dark:group-hover:from-indigo-800 dark:group-hover:to-indigo-700 transition-all duration-200">
-                          <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        <div className="w-9 h-9 bg-primary-soft rounded-control flex items-center justify-center flex-shrink-0 transition-all duration-200">
+                          <FileText className="w-4 h-4 text-primary-soft-fg" />
                         </div>
-                        <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors line-clamp-2">
+                        <span className="text-sm font-semibold text-fg group-hover:text-primary transition-colors line-clamp-2">
                           {link.title}
                         </span>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-all duration-200 flex-shrink-0 mt-1" />
+                      <ExternalLink className="w-4 h-4 text-fg-subtle group-hover:text-primary transition-all duration-200 flex-shrink-0 mt-1" />
                     </div>
 
                     {link.description && (
-                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3 pl-11">
+                      <p className="text-xs text-fg-muted leading-relaxed line-clamp-3 pl-11">
                         {link.description}
                       </p>
                     )}
                   </a>
 
-                  <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800 mt-auto">
+                  <div className="flex justify-end pt-2 border-t border-border mt-auto">
                     <button
                       type="button"
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-all duration-200"
+                      className="flex items-center gap-1.5 text-xs font-medium text-fg-muted hover:text-primary-soft-fg hover:bg-primary-soft px-3 py-1.5 rounded-control transition-colors duration-200"
                       onClick={() => startEdit(link)}
                     >
                       <Edit3 size={12} />

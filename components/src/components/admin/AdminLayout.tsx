@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "../../hooks/useTranslation";
 import ThemePicker from "../ThemePicker";
+import { iconButtonClasses } from "../ui";
 
 interface AdminLayoutProps {
     title: string;
@@ -36,20 +37,21 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
     ].filter(item => !item.hidden);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col transition-colors">
+        <div className="min-h-screen bg-bg text-fg flex flex-col transition-colors">
             {/* Top Header */}
-            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm transition-colors">
+            <header className="bg-surface/90 backdrop-blur-md border-b border-border px-6 py-3 flex items-center justify-between sticky top-0 z-30 transition-colors">
                 <div className="flex items-center gap-4">
                     <Link
                         to="/"
-                        className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                        className={iconButtonClasses("secondary", "md")}
                         title={t('backToDashboard')}
+                        aria-label={t('backToDashboard')}
                     >
                         <ArrowLeft size={20} />
                     </Link>
                     <div>
-                        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight">{title}</h1>
-                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                        <h1 className="text-xl font-bold text-fg leading-tight">{title}</h1>
+                        <span className="text-[11px] font-bold text-primary uppercase tracking-widest flex items-center gap-1">
                             <Shield size={10} /> {t('adminPortal')}
                         </span>
                     </div>
@@ -59,25 +61,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
                     {/* Perfil de Usuario */}
                     <div className="flex items-center gap-3 pl-2 group">
                         <div className="flex flex-col items-end hidden md:flex text-right">
-                            <span className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                            <span className="text-sm font-bold text-fg leading-tight">
                                 {profile?.name || t('user')}
                             </span>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isGlobalAdmin ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400" : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
+                            <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isGlobalAdmin ? "bg-warning-soft text-warning" : "bg-primary-soft text-primary-soft-fg"
                                 }`}>
                                 {isGlobalAdmin ? t('superadmin') : t('companyAdmin')}
                             </span>
                         </div>
-                        <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm relative group-hover:border-blue-300 transition-all cursor-default">
+                        <div className="w-10 h-10 bg-surface-muted border border-border rounded-full flex items-center justify-center text-fg-muted shadow-card relative group-hover:border-primary/40 transition-all cursor-default">
                             <UserIcon size={20} />
                         </div>
                     </div>
 
-                    <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
+                    <div className="h-8 w-px bg-border" />
 
                     {/* Idioma */}
                     <button
                         onClick={toggleLanguage}
-                        className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-all active:scale-95 group"
+                        className="flex items-center gap-1.5 h-9 px-2.5 bg-surface border border-border rounded-control text-fg-muted hover:text-fg hover:border-border-strong transition-colors active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         title={language === 'es' ? t('switchToEnglish') : t('switchToSpanish')}
                     >
                         <Languages size={16} className="group-hover:rotate-12 transition-transform" />
@@ -92,8 +94,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
                             await supabase.auth.signOut();
                             window.location.reload();
                         }}
-                        className="p-2.5 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all border border-transparent hover:border-red-100 flex items-center gap-2"
+                        className={iconButtonClasses("danger", "md")}
                         title={t('signOut')}
+                        aria-label={t('signOut')}
                     >
                         <LogOut size={18} />
                     </button>
@@ -102,19 +105,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar Mini */}
-                <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 hidden md:flex flex-col gap-2 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.05)] dark:shadow-none transition-colors">
+                <aside className="w-64 bg-surface border-r border-border p-4 hidden md:flex flex-col gap-2 transition-colors">
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         return (
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${isActive
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none translate-x-1"
-                                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                                aria-current={isActive ? "page" : undefined}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-control transition-all group ${isActive
+                                    ? "bg-primary text-primary-fg shadow-card translate-x-1"
+                                    : "text-fg-muted hover:bg-surface-muted hover:text-fg"
                                     }`}
                             >
-                                <div className={isActive ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"}>
+                                <div className={isActive ? "text-primary-fg" : "text-fg-subtle group-hover:text-primary transition-colors"}>
                                     {item.icon}
                                 </div>
                                 <span className="font-semibold text-sm">{item.label}</span>
@@ -124,7 +128,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
                 </aside>
 
                 {/* Content */}
-                <main className="flex-1 overflow-auto p-6 lg:p-10 bg-slate-50/50 dark:bg-slate-950/50 transition-colors">
+                <main className="flex-1 overflow-auto p-6 lg:p-10 bg-bg transition-colors">
                     <div className="max-w-6xl mx-auto">
                         {children}
                     </div>

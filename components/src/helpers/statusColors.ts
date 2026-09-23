@@ -40,6 +40,11 @@ export interface StatusColorClasses {
   icon: string;
   /** Saturated gradient fill (column headers); pair with white text. */
   solid: string;
+  /**
+   * Mid-tone (500) hex value for inline styles and SVG/charts, e.g. gradients.
+   * Readable on both light and dark surfaces.
+   */
+  hex: string;
 }
 
 const ALIASES: Record<string, StatusColorName> = {
@@ -63,6 +68,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-emerald-200 dark:border-emerald-500/30",
     dot: "bg-emerald-500",
     icon: "text-emerald-600 dark:text-emerald-400",
+    hex: "#10b981",
     solid: "bg-gradient-to-br from-emerald-500 to-emerald-700",
   },
   blue: {
@@ -71,6 +77,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-blue-200 dark:border-blue-500/30",
     dot: "bg-blue-500",
     icon: "text-blue-600 dark:text-blue-400",
+    hex: "#3b82f6",
     solid: "bg-gradient-to-br from-blue-500 to-blue-700",
   },
   rose: {
@@ -79,6 +86,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-rose-200 dark:border-rose-500/30",
     dot: "bg-rose-500",
     icon: "text-rose-600 dark:text-rose-400",
+    hex: "#f43f5e",
     solid: "bg-gradient-to-br from-rose-500 to-rose-700",
   },
   amber: {
@@ -87,6 +95,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-amber-200 dark:border-amber-500/30",
     dot: "bg-amber-500",
     icon: "text-amber-600 dark:text-amber-400",
+    hex: "#f59e0b",
     solid: "bg-gradient-to-br from-amber-500 to-amber-700",
   },
   purple: {
@@ -95,6 +104,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-purple-200 dark:border-purple-500/30",
     dot: "bg-purple-500",
     icon: "text-purple-600 dark:text-purple-400",
+    hex: "#a855f7",
     solid: "bg-gradient-to-br from-purple-500 to-purple-700",
   },
   slate: {
@@ -103,6 +113,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-slate-200 dark:border-slate-500/30",
     dot: "bg-slate-400",
     icon: "text-slate-500 dark:text-slate-400",
+    hex: "#64748b",
     solid: "bg-gradient-to-br from-slate-600 to-slate-700",
   },
   indigo: {
@@ -111,6 +122,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-indigo-200 dark:border-indigo-500/30",
     dot: "bg-indigo-500",
     icon: "text-indigo-600 dark:text-indigo-400",
+    hex: "#6366f1",
     solid: "bg-gradient-to-br from-indigo-500 to-indigo-700",
   },
   cyan: {
@@ -119,6 +131,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-cyan-200 dark:border-cyan-500/30",
     dot: "bg-cyan-500",
     icon: "text-cyan-600 dark:text-cyan-400",
+    hex: "#06b6d4",
     solid: "bg-gradient-to-br from-cyan-500 to-cyan-700",
   },
   orange: {
@@ -127,6 +140,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-orange-200 dark:border-orange-500/30",
     dot: "bg-orange-500",
     icon: "text-orange-600 dark:text-orange-400",
+    hex: "#f97316",
     solid: "bg-gradient-to-br from-orange-500 to-orange-700",
   },
   pink: {
@@ -135,6 +149,7 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
     border: "border-pink-200 dark:border-pink-500/30",
     dot: "bg-pink-500",
     icon: "text-pink-600 dark:text-pink-400",
+    hex: "#ec4899",
     solid: "bg-gradient-to-br from-pink-500 to-pink-700",
   },
 };
@@ -142,16 +157,25 @@ const CLASSES: Record<StatusColorName, BaseClasses> = {
 const isStatusColorName = (value: string): value is StatusColorName =>
   (STATUS_COLOR_NAMES as readonly string[]).includes(value);
 
-/** Maps any stored color name (including aliases and junk) to a canonical one. */
-export function normalizeStatusColor(colorName: string | null | undefined): StatusColorName {
-  if (typeof colorName !== "string") return FALLBACK;
+/**
+ * Maps any stored color name (including aliases and junk) to a canonical one.
+ * `fallback` is used for missing/unknown names (defaults to slate).
+ */
+export function normalizeStatusColor(
+  colorName: string | null | undefined,
+  fallback: StatusColorName = FALLBACK,
+): StatusColorName {
+  if (typeof colorName !== "string") return fallback;
   const key = colorName.trim().toLowerCase();
   if (isStatusColorName(key)) return key;
-  return ALIASES[key] ?? FALLBACK;
+  return ALIASES[key] ?? fallback;
 }
 
-export function getStatusColorClasses(colorName: string | null | undefined): StatusColorClasses {
-  const name = normalizeStatusColor(colorName);
+export function getStatusColorClasses(
+  colorName: string | null | undefined,
+  fallback: StatusColorName = FALLBACK,
+): StatusColorClasses {
+  const name = normalizeStatusColor(colorName, fallback);
   const c = CLASSES[name];
   return { name, ...c, badge: `${c.bg} ${c.text} ${c.border}` };
 }

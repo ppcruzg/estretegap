@@ -1,7 +1,9 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { X, Network, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { PageData, DashboardColumn, DashboardItem } from "@/types";
 import { useTranslation } from "../hooks/useTranslation";
+import { getStatusColorClasses } from "../helpers/statusColors";
+import IconButton from "./ui/IconButton";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -44,22 +46,10 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
     const dragStart = useRef<Point>({ x: 0, y: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Color mapping based on Tailwind colors from types
+    // Column colors are data colors (identical across palettes); the root node inverts the surface.
     const getColorClass = (color?: string, type?: string) => {
-        if (type === 'root') return "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xl border-slate-700";
-
-        switch (color) {
-            case 'blue': return "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400";
-            case 'orange': return "bg-orange-500/10 border-orange-500/50 text-orange-700 dark:text-orange-400";
-            case 'purple': return "bg-purple-500/10 border-purple-500/50 text-purple-700 dark:text-purple-400";
-            case 'green': return "bg-emerald-500/10 border-emerald-500/50 text-emerald-700 dark:text-emerald-400";
-            case 'rose':
-            case 'red': return "bg-rose-500/10 border-rose-500/50 text-rose-700 dark:text-rose-400";
-            case 'amber': return "bg-amber-500/10 border-amber-500/50 text-amber-700 dark:text-amber-400";
-            case 'indigo': return "bg-indigo-500/10 border-indigo-500/50 text-indigo-700 dark:text-indigo-400";
-            case 'cyan': return "bg-cyan-500/10 border-cyan-500/50 text-cyan-700 dark:text-cyan-400";
-            default: return "bg-slate-500/10 border-slate-500/50 text-slate-700 dark:text-slate-400";
-        }
+        if (type === 'root') return "bg-fg text-bg border-fg shadow-pop";
+        return getStatusColorClasses(color).badge;
     };
 
     // Build the tree and calculate layout
@@ -171,6 +161,14 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
 
     const handleMouseUp = () => setIsDragging(false);
 
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [onClose]);
+
     const handleWheel = (e: React.WheelEvent) => {
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         setZoom(prev => Math.min(Math.max(prev * delta, 0.2), 2));
@@ -195,7 +193,7 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        className="text-slate-200 dark:text-slate-700 transition-colors"
+                        className="text-border-strong transition-colors"
                     />
                 );
             });
@@ -203,39 +201,39 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[3000] bg-slate-900/40 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="relative w-full h-full bg-white dark:bg-slate-950 border border-white/20 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[3000] bg-overlay backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-300">
+            <div role="dialog" aria-modal="true" aria-label={t('viewMindMap')} className="relative w-full h-full bg-surface text-fg border border-border rounded-[2.5rem] shadow-pop overflow-hidden flex flex-col">
 
                 {/* Header Premium */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md z-10">
+                <div className="flex items-center justify-between p-6 border-b border-border bg-surface/80 backdrop-blur-md z-10">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none">
-                            <Network className="text-white" size={24} />
+                        <div className="w-12 h-12 bg-primary text-primary-fg rounded-2xl flex items-center justify-center shadow-card">
+                            <Network size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">{t('viewMindMap')}</h2>
-                            <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">{pageData.pageConfig.title}</p>
+                            <h2 className="text-xl font-black text-fg uppercase tracking-wider">{t('viewMindMap')}</h2>
+                            <p className="text-xs text-fg-muted font-bold tracking-widest uppercase">{pageData.pageConfig.title}</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-slate-800">
-                            <button onClick={() => setZoom(z => Math.min(z + 0.1, 2))} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-all"><ZoomIn size={18} /></button>
-                            <span className="px-2 text-xs font-bold text-slate-500 min-w-[50px] text-center">{Math.round(zoom * 100)}%</span>
-                            <button onClick={() => setZoom(z => Math.max(z - 0.1, 0.2))} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-all"><ZoomOut size={18} /></button>
-                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1" />
-                            <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-all"><RotateCcw size={18} /></button>
+                        <div className="flex items-center bg-surface-muted rounded-control p-1 border border-border">
+                            <button onClick={() => setZoom(z => Math.min(z + 0.1, 2))} aria-label={t('zoomIn')} title={t('zoomIn')} className="p-2 hover:bg-surface rounded-control text-fg-muted hover:text-fg transition-all"><ZoomIn size={18} /></button>
+                            <span className="px-2 text-xs font-bold text-fg-muted min-w-[50px] text-center">{Math.round(zoom * 100)}%</span>
+                            <button onClick={() => setZoom(z => Math.max(z - 0.1, 0.2))} aria-label={t('zoomOut')} title={t('zoomOut')} className="p-2 hover:bg-surface rounded-control text-fg-muted hover:text-fg transition-all"><ZoomOut size={18} /></button>
+                            <div className="w-px h-4 bg-border mx-1" />
+                            <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} aria-label={t('resetView')} title={t('resetView')} className="p-2 hover:bg-surface rounded-control text-fg-muted hover:text-fg transition-all"><RotateCcw size={18} /></button>
                         </div>
-                        <button onClick={onClose} className="p-3 bg-slate-100 dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-500 hover:text-rose-600 rounded-2xl transition-all border border-transparent hover:border-rose-100 dark:hover:border-rose-900/50">
+                        <IconButton aria-label={t('close')} variant="danger" onClick={onClose} className="h-11 w-11 bg-surface-muted">
                             <X size={20} />
-                        </button>
+                        </IconButton>
                     </div>
                 </div>
 
                 {/* Mind Map Area */}
                 <div
                     ref={containerRef}
-                    className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing bg-slate-50 dark:bg-slate-950/20"
+                    className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing bg-bg text-fg"
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
@@ -263,10 +261,10 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
                         {tree.map(node => (
                             <div
                                 key={node.id}
-                                className={`absolute flex flex-col items-center justify-center px-4 py-2 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-2xl z-20 group
+                                className={`absolute flex flex-col items-center justify-center px-4 py-2 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-pop z-20 group
                                     ${getColorClass(node.color, node.type)}
-                                   ${node.type === 'item' && node.status === 'completado' ? 'ring-2 ring-emerald-500/50 border-emerald-500 shadow-lg shadow-emerald-500/10' : ''}
-                                   ${node.type === 'item' && node.status === 'bloqueado' ? 'ring-2 ring-rose-500/50 border-rose-500 shadow-lg shadow-rose-500/10 animate-pulse' : ''}
+                                   ${node.type === 'item' && node.status === 'completado' ? 'ring-2 ring-success/50 border-success shadow-card' : ''}
+                                   ${node.type === 'item' && node.status === 'bloqueado' ? 'ring-2 ring-danger/50 border-danger shadow-card animate-pulse' : ''}
                                 `}
                                 style={{
                                     width: node.width,
@@ -277,10 +275,10 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
                             >
                                 <div className="flex items-center gap-2 max-w-full">
                                     {node.type === 'item' && node.status === 'bloqueado' && (
-                                        <AlertTriangle size={14} className="text-rose-500 shrink-0" />
+                                        <AlertTriangle size={14} className="text-danger shrink-0" />
                                     )}
                                     {node.type === 'item' && node.status === 'completado' && (
-                                        <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                                        <CheckCircle2 size={14} className="text-success shrink-0" />
                                     )}
                                     <span className={`text-center font-bold tracking-tight leading-tight select-none truncate
                                         ${node.type === 'root' ? 'text-sm' : 'text-xs'}
@@ -293,9 +291,9 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
 
                                 {/* Date Display */}
                                 {node.type === 'item' && node.date && (
-                                    <div className="flex items-center gap-1 mt-1 opacity-60">
+                                    <div className="flex items-center gap-1 mt-1 opacity-75">
                                         <Clock size={10} />
-                                        <span className="text-[9px] font-bold">
+                                        <span className="text-[11px] font-bold">
                                             {format(parseISO(node.date), "d MMM yyyy", { locale: es })}
                                         </span>
                                     </div>
@@ -303,15 +301,15 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
 
                                 {/* Status Dot for Items (Legacy or subtle indicator) */}
                                 {node.type === 'item' && node.status && node.status !== 'completado' && node.status !== 'bloqueado' && (
-                                    <div className={`absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 shadow-sm
-                                        ${node.status === 'en-proceso' ? 'bg-blue-500' : 'bg-slate-400'}
+                                    <div className={`absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full border-2 border-surface shadow-card
+                                        ${getStatusColorClasses(node.status === 'en-proceso' ? 'blue' : 'slate').dot}
                                     `} />
                                 )}
 
                                 {/* Progress Bar for Items with Checklist */}
                                 {node.type === 'item' && node.children.length > 0 && (
-                                    <div className="absolute -bottom-1 left-4 right-4 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <div className={`h-full opacity-50 transition-all duration-500 ${node.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${node.progress || 0}%` }} />
+                                    <div className="absolute -bottom-1 left-4 right-4 h-1 bg-border rounded-full overflow-hidden">
+                                        <div className={`h-full opacity-50 transition-all duration-500 ${getStatusColorClasses(node.progress === 100 ? 'emerald' : 'blue').dot}`} style={{ width: `${node.progress || 0}%` }} />
                                     </div>
                                 )}
                             </div>
@@ -320,7 +318,7 @@ const MindMapPanel: React.FC<MindMapPanelProps> = ({ pageData, onClose }) => {
                 </div>
 
                 {/* Footer Tip */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <div className="p-4 bg-surface-muted border-t border-border flex justify-between items-center text-[11px] font-bold text-fg-muted uppercase tracking-widest">
                     <div className="flex gap-6">
                         <span>Click & Drag para mover</span>
                         <span>Scroll para Zoom</span>

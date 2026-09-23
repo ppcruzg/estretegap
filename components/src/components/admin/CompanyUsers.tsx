@@ -21,12 +21,14 @@ import {
   ArrowRight
 } from "lucide-react";
 import Modal from "../Modal";
+import IconButton from "../ui/IconButton";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   canRemoveUserFromCompany,
   canDowngradeAdmin
 } from "../../domain/securityRules";
 import { useTranslation } from "../../hooks/useTranslation";
+import { buttonClasses } from "../ui";
 
 const CompanyUsersScreen: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -149,9 +151,9 @@ const CompanyUsersScreen: React.FC = () => {
 
         {/* Company Selector */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-              <Building2 size={16} className="text-blue-500 dark:text-blue-400" />
+          <div className="bg-surface rounded-card shadow-card border border-border p-6">
+            <h3 className="text-sm font-semibold text-fg mb-4 flex items-center gap-2">
+              <Building2 size={16} className="text-primary" />
               {t('selectCompanyTitle')}
             </h3>
             <div className="space-y-2">
@@ -159,9 +161,10 @@ const CompanyUsersScreen: React.FC = () => {
                 <button
                   key={company.id}
                   onClick={() => setSelectedCompanyId(company.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group ${selectedCompanyId === company.id
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-100 dark:shadow-none"
-                    : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  aria-pressed={selectedCompanyId === company.id}
+                  className={`w-full text-left px-4 py-3 rounded-control transition-all flex items-center justify-between group ${selectedCompanyId === company.id
+                    ? "bg-primary text-primary-fg shadow-card"
+                    : "bg-surface-muted text-fg-muted hover:text-fg hover:bg-border"
                     }`}
                 >
                   <span className="font-medium truncate">{company.name}</span>
@@ -173,17 +176,17 @@ const CompanyUsersScreen: React.FC = () => {
 
           {/* User Search for Assignment */}
           {selectedCompanyId && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <UserPlus size={16} className="text-blue-500 dark:text-blue-400" />
+            <div className="bg-surface rounded-card shadow-card border border-border p-6">
+              <h3 className="text-sm font-semibold text-fg mb-4 flex items-center gap-2">
+                <UserPlus size={16} className="text-primary" />
                 {t('assignNewUserTitle')}
               </h3>
               <div className="relative mb-4">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
                 <input
                   type="text"
                   placeholder={t('searchUserPlaceholder')}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 text-xs"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-muted text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary text-xs"
                   value={userSearchTerm}
                   onChange={(e) => setUserSearchTerm(e.target.value)}
                 />
@@ -191,24 +194,24 @@ const CompanyUsersScreen: React.FC = () => {
 
               <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                 {availableUsers.length === 0 ? (
-                  <div className="text-center py-4 text-xs text-slate-400">
+                  <div className="text-center py-4 text-xs text-fg-muted">
                     {t('noUsersAvailableMsg')}
                   </div>
                 ) : (
                   availableUsers.map(profile => (
-                    <div key={profile.id} className="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl hover:border-slate-200 dark:hover:border-slate-600 transition-all">
-                      <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate mb-1">{profile.name || profile.email}</div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate mb-3">{profile.email}</div>
+                    <div key={profile.id} className="p-3 bg-surface-muted border border-border rounded-control hover:border-border-strong transition-all">
+                      <div className="text-xs font-semibold text-fg truncate mb-1">{profile.name || profile.email}</div>
+                      <div className="text-[11px] text-fg-muted truncate mb-3">{profile.email}</div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAssign(profile.id, 'company-user')}
-                          className="flex-1 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                          className="flex-1 py-1.5 bg-surface border border-border rounded-control text-[11px] font-bold text-fg-muted hover:text-fg hover:border-border-strong transition-colors"
                         >
                           {t('standard')}
                         </button>
                         <button
                           onClick={() => handleAssign(profile.id, 'company-admin')}
-                          className="flex-1 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 rounded-lg text-[10px] font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                          className="flex-1 py-1.5 bg-primary-soft text-primary-soft-fg border border-primary/20 rounded-control text-[11px] font-bold hover:bg-primary/15 transition-colors"
                         >
                           {t('administrador')}
                         </button>
@@ -223,42 +226,42 @@ const CompanyUsersScreen: React.FC = () => {
 
         {/* Assignment List */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden min-h-[500px]">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                {t('usersInHeader')} <span className="text-blue-600 dark:text-blue-400">{selectedCompany?.name || t('selectCompanyTitle')}</span>
+          <div className="bg-surface rounded-card shadow-card border border-border overflow-hidden min-h-[500px]">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-bold text-fg flex items-center gap-2">
+                {t('usersInHeader')} <span className="text-primary">{selectedCompany?.name || t('selectCompanyTitle')}</span>
               </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('manageAccessRolesDesc')}</p>
+              <p className="text-sm text-fg-muted mt-1">{t('manageAccessRolesDesc')}</p>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/50 dark:bg-slate-800/50">
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('userCol')}</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('roleInCompany')}</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('actionsCol')}</th>
+                  <tr className="bg-surface-muted/60">
+                    <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">{t('userCol')}</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">{t('roleInCompany')}</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider text-right">{t('actionsCol')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-border">
                   {loading ? (
                     <tr>
-                      <td colSpan={3} className="px-6 py-12 text-center text-slate-400">
+                      <td colSpan={3} className="px-6 py-12 text-center text-fg-muted">
                         <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="animate-spin text-blue-500 dark:text-blue-400" />
+                          <Loader2 className="animate-spin text-primary" />
                           <span>{t('loadingAssignmentsMsg')}</span>
                         </div>
                       </td>
                     </tr>
                   ) : !selectedCompanyId ? (
                     <tr>
-                      <td colSpan={3} className="px-6 py-12 text-center text-slate-400">
+                      <td colSpan={3} className="px-6 py-12 text-center text-fg-muted">
                         {t('selectCompanyOnLeft')}
                       </td>
                     </tr>
                   ) : currentCompanyRelations.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-6 py-12 text-center text-slate-400">
+                      <td colSpan={3} className="px-6 py-12 text-center text-fg-muted">
                         {t('noUsersAssignedYet')}
                       </td>
                     </tr>
@@ -266,15 +269,15 @@ const CompanyUsersScreen: React.FC = () => {
                     currentCompanyRelations.map((relation) => {
                       const profile = profiles.find(p => p.id === relation.user_id);
                       return (
-                        <tr key={relation.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors group">
+                        <tr key={relation.id} className="hover:bg-surface-muted/70 transition-colors group">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold uppercase text-xs">
+                              <div className="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-fg-muted font-bold uppercase text-xs">
                                 {(profile?.name || profile?.email || "?").charAt(0)}
                               </div>
                               <div>
-                                <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{profile?.name || t('noName')}</div>
-                                <div className="text-[11px] text-slate-400 dark:text-slate-500">{profile?.email}</div>
+                                <div className="text-sm font-medium text-fg">{profile?.name || t('noName')}</div>
+                                <div className="text-[11px] text-fg-muted">{profile?.email}</div>
                               </div>
                             </div>
                           </td>
@@ -282,8 +285,8 @@ const CompanyUsersScreen: React.FC = () => {
                             <button
                               onClick={() => handleToggleRole(relation)}
                               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all ${relation.role === 'company-admin'
-                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                ? "bg-primary-soft text-primary-soft-fg hover:bg-primary/20"
+                                : "bg-surface-muted text-fg-muted hover:bg-border"
                                 }`}
                               title={relation.role === 'company-admin'
                                 ? t('companyAdminRoleTip')
@@ -295,13 +298,14 @@ const CompanyUsersScreen: React.FC = () => {
                             </button>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <button
+                            <IconButton
+                              aria-label={t('removeFromCompanyTip')}
+                              variant="danger"
+                              size="sm"
                               onClick={() => handleRemove(relation)}
-                              className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all"
-                              title={t('removeFromCompanyTip')}
                             >
                               <Trash2 size={16} />
-                            </button>
+                            </IconButton>
                           </td>
                         </tr>
                       );

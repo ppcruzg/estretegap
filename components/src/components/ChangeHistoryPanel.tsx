@@ -15,6 +15,10 @@ import {
     User
 } from "lucide-react";
 import * as Repo from "../repository/estrategiaRepository";
+import { changeActionClasses } from "../helpers/semanticColors";
+import { useTranslation } from "../hooks/useTranslation";
+import IconButton from "./ui/IconButton";
+import { buttonClasses, inputClasses } from "./ui";
 import type { ChangeHistoryEntry, ChangeHistoryFilters } from "@/types/changeHistory";
 
 interface ChangeHistoryPanelProps {
@@ -32,10 +36,19 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState<ChangeHistoryFilters>({});
     const [showFilters, setShowFilters] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         loadHistory();
     }, [pageId, filters]);
+
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [onClose]);
 
     const loadHistory = async () => {
         setLoading(true);
@@ -64,20 +77,7 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
         }
     };
 
-    const getActionColor = (action: string) => {
-        switch (action) {
-            case "created":
-                return "bg-emerald-100 text-emerald-700 border-emerald-200";
-            case "updated":
-                return "bg-blue-100 text-blue-700 border-blue-200";
-            case "deleted":
-                return "bg-red-100 text-red-700 border-red-200";
-            case "moved":
-                return "bg-purple-100 text-purple-700 border-purple-200";
-            default:
-                return "bg-slate-100 text-slate-700 border-slate-200";
-        }
-    };
+    const getActionColor = (action: string) => changeActionClasses(action);
 
     const getEntityIcon = (entityType: string) => {
         switch (entityType) {
@@ -169,27 +169,28 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-in fade-in duration-200">
+            <div role="dialog" aria-modal="true" aria-labelledby="change-history-title" className="bg-surface-raised text-fg border border-border rounded-card shadow-pop w-full max-w-4xl max-h-[90vh] flex flex-col animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                <div className="flex items-center justify-between p-6 border-b border-border">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                            <Clock className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 bg-primary text-primary-fg rounded-control flex items-center justify-center shadow-card">
+                            <Clock className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-900">Historial de Cambios</h2>
-                            <p className="text-sm text-slate-500">{pageTitle}</p>
+                            <h2 id="change-history-title" className="text-xl font-bold text-fg">Historial de Cambios</h2>
+                            <p className="text-sm text-fg-muted">{pageTitle}</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${showFilters
-                                    ? "bg-indigo-100 text-indigo-700 border-2 border-indigo-200"
-                                    : "bg-slate-100 text-slate-700 hover:bg-slate-200 border-2 border-transparent"
+                            aria-pressed={showFilters}
+                            className={`flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold transition-colors duration-200 border ${showFilters
+                                    ? "bg-primary-soft text-primary-soft-fg border-primary/30"
+                                    : "bg-surface-muted text-fg hover:bg-surface border-border"
                                 }`}
                         >
                             <Filter size={16} />
@@ -198,27 +199,25 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
 
                         <button
                             onClick={exportToCSV}
-                            className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-all duration-200"
+                            className={buttonClasses("secondary", "md")}
                             disabled={history.length === 0}
                         >
                             <Download size={16} />
                             Exportar
                         </button>
 
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-all duration-200"
-                        >
-                            <X size={20} className="text-slate-500" />
-                        </button>
+                        <IconButton aria-label={t("close")} onClick={onClose}>
+                            <X size={20} />
+                        </IconButton>
                     </div>
                 </div>
 
                 {/* Filters */}
                 {showFilters && (
-                    <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-3 gap-3">
+                    <div className="p-4 bg-surface-muted border-b border-border grid grid-cols-3 gap-3">
                         <select
-                            className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none"
+                            className={inputClasses}
+                            aria-label="Tipo"
                             value={filters.entityType || ""}
                             onChange={(e) => setFilters({ ...filters, entityType: e.target.value as any || undefined })}
                         >
@@ -228,7 +227,8 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                         </select>
 
                         <select
-                            className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none"
+                            className={inputClasses}
+                            aria-label="Acción"
                             value={filters.action || ""}
                             onChange={(e) => setFilters({ ...filters, action: e.target.value as any || undefined })}
                         >
@@ -241,7 +241,7 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
 
                         <button
                             onClick={() => setFilters({})}
-                            className="px-3 py-2 bg-white border-2 border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all duration-200"
+                            className={buttonClasses("secondary", "md")}
                         >
                             Limpiar filtros
                         </button>
@@ -252,16 +252,16 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                 <div className="flex-1 overflow-y-auto p-6">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                            <p className="text-slate-500">Cargando historial...</p>
+                            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p className="text-fg-muted">Cargando historial...</p>
                         </div>
                     ) : history.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                                <Clock size={32} className="text-slate-400" />
+                            <div className="w-16 h-16 bg-surface-muted rounded-full flex items-center justify-center mb-4">
+                                <Clock size={32} className="text-fg-subtle" />
                             </div>
-                            <h3 className="text-lg font-semibold text-slate-900 mb-2">Sin cambios registrados</h3>
-                            <p className="text-sm text-slate-500">
+                            <h3 className="text-lg font-semibold text-fg mb-2">Sin cambios registrados</h3>
+                            <p className="text-sm text-fg-muted">
                                 Los cambios aparecerán aquí cuando se realicen modificaciones
                             </p>
                         </div>
@@ -274,7 +274,7 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                                 >
                                     {/* Timeline line */}
                                     {index < history.length - 1 && (
-                                        <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-slate-200"></div>
+                                        <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-border"></div>
                                     )}
 
                                     {/* Timeline dot */}
@@ -283,29 +283,29 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
                                     </div>
 
                                     {/* Content */}
-                                    <div className="bg-white border-2 border-slate-200 rounded-xl p-4 hover:border-indigo-200 hover:shadow-md transition-all duration-200">
+                                    <div className="bg-surface border border-border rounded-card p-4 hover:border-primary/40 hover:shadow-card transition-all duration-200">
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex items-center gap-2">
-                                                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                                                <div className="flex items-center gap-1.5 text-sm font-medium text-fg">
                                                     {getEntityIcon(entry.entityType)}
                                                     <span className="capitalize">{entry.entityType === "column" ? "Grupo" : "Item"}</span>
                                                 </div>
-                                                <span className="text-slate-400">•</span>
-                                                <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${getActionColor(entry.action)}`}>
+                                                <span className="text-fg-subtle">•</span>
+                                                <span className={`px-2 py-0.5 rounded-md text-xs font-medium border ${getActionColor(entry.action)}`}>
                                                     {entry.action === "created" && "Creado"}
                                                     {entry.action === "updated" && "Actualizado"}
                                                     {entry.action === "deleted" && "Eliminado"}
                                                     {entry.action === "moved" && "Movido"}
                                                 </span>
                                             </div>
-                                            <span className="text-xs text-slate-500">{formatDate(entry.changedAt)}</span>
+                                            <span className="text-xs text-fg-muted">{formatDate(entry.changedAt)}</span>
                                         </div>
 
-                                        <p className="text-sm text-slate-900 mb-2">
+                                        <p className="text-sm text-fg mb-2">
                                             {getChangeDescription(entry)}
                                         </p>
 
-                                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                                        <div className="flex items-center gap-2 text-xs text-fg-muted">
                                             <User size={12} />
                                             <span>{entry.changedByName}</span>
                                         </div>
@@ -318,14 +318,14 @@ const ChangeHistoryPanel: React.FC<ChangeHistoryPanelProps> = ({
 
                 {/* Footer Stats */}
                 {!loading && history.length > 0 && (
-                    <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                    <div className="p-4 bg-surface-muted border-t border-border rounded-b-card flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-2">
-                                <TrendingUp size={16} className="text-indigo-600" />
-                                <span className="font-medium text-slate-700">{history.length} cambios</span>
+                                <TrendingUp size={16} className="text-primary" />
+                                <span className="font-medium text-fg">{history.length} cambios</span>
                             </div>
                             {filters.entityType && (
-                                <span className="text-slate-500">
+                                <span className="text-fg-muted">
                                     Filtrando por: {filters.entityType === "column" ? "Grupos" : "Items"}
                                 </span>
                             )}

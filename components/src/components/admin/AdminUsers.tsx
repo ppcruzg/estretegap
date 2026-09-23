@@ -4,8 +4,10 @@ import { getProfiles, toggleSuperAdmin, updateProfile, signUpAdminUser, getCompa
 import { Profile, Company, CompanyUser } from "@/types";
 import { Search, UserCog, ShieldCheck, ShieldAlert, Edit2, Loader2, UserPlus, Mail } from "lucide-react";
 import Modal from "../Modal";
+import IconButton from "../ui/IconButton";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "../../hooks/useTranslation";
+import { buttonClasses } from "../ui";
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<Profile[]>([]);
@@ -193,27 +195,27 @@ const AdminUsers: React.FC = () => {
 
   return (
     <AdminLayout title={t('userManagement')}>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-surface rounded-card shadow-card border border-border overflow-hidden">
         {/* ToolBar */}
-        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
             <input
               type="text"
               placeholder={t('searchByEmailOrName')}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm"
+              className="w-full h-10 pl-10 pr-4 bg-surface-muted text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <div className="text-sm text-slate-500 dark:text-slate-400">
+          <div className="text-sm text-fg-muted">
             {t('showingUsers', { count: filteredUsers.length.toString() })}
           </div>
 
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95"
+            className={buttonClasses("primary", "md")}
           >
             <UserPlus size={18} />
             {t('addUser')}
@@ -224,44 +226,44 @@ const AdminUsers: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 dark:bg-slate-800/50">
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('userCol')}</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('roleCol')}</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('actionsCol')}</th>
+              <tr className="bg-surface-muted/60">
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">{t('userCol')}</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">Email</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">{t('roleCol')}</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider text-right">{t('actionsCol')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                  <td colSpan={4} className="px-6 py-12 text-center text-fg-muted">
                     <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="animate-spin text-blue-500 dark:text-blue-400" />
+                      <Loader2 className="animate-spin text-primary" />
                       <span>{t('loadingUsers')}</span>
                     </div>
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                  <td colSpan={4} className="px-6 py-12 text-center text-fg-muted">
                     {t('noUsersFound')}
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors group">
+                  <tr key={user.id} className="hover:bg-surface-muted/70 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold uppercase text-sm">
+                        <div className="w-9 h-9 rounded-full bg-primary-soft flex items-center justify-center text-primary-soft-fg font-bold uppercase text-sm">
                           {(user.name || user.email).charAt(0)}
                         </div>
                         <div>
-                          <div className="font-medium text-slate-900 dark:text-slate-100">{user.name || t('noName')}</div>
-                          <div className="text-xs text-slate-400 dark:text-slate-500 md:hidden">{user.email}</div>
+                          <div className="font-medium text-fg">{user.name || t('noName')}</div>
+                          <div className="text-xs text-fg-muted md:hidden">{user.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 hidden md:table-cell text-sm text-slate-600 dark:text-slate-400">
+                    <td className="px-6 py-4 hidden md:table-cell text-sm text-fg-muted">
                       {user.email}
                     </td>
                     <td className="px-6 py-4">
@@ -269,7 +271,7 @@ const AdminUsers: React.FC = () => {
                         <button
                           onClick={() => handleToggleAdmin(user.id, user.is_admin)}
                           disabled={!isSuperAdmin}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 transition-all ${isSuperAdmin ? "hover:bg-emerald-200 dark:hover:bg-emerald-900/50" : "opacity-75 cursor-default"}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success-soft text-success transition-all ${isSuperAdmin ? "hover:bg-success/20" : "opacity-75 cursor-default"}`}
                           title={isSuperAdmin ? t('superadminTip') : t('superadminDesc')}
                         >
                           <ShieldCheck size={14} />
@@ -279,7 +281,7 @@ const AdminUsers: React.FC = () => {
                         <button
                           onClick={() => handleToggleAdmin(user.id, user.is_admin)}
                           disabled={!isSuperAdmin}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 transition-all ${isSuperAdmin ? "hover:bg-blue-200 dark:hover:bg-blue-900/50" : "opacity-75 cursor-default"}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary-soft text-primary-soft-fg transition-all ${isSuperAdmin ? "hover:bg-primary/20" : "opacity-75 cursor-default"}`}
                           title={isSuperAdmin ? t('adminTip') : t('adminDesc')}
                         >
                           <UserCog size={14} />
@@ -289,7 +291,7 @@ const AdminUsers: React.FC = () => {
                         <button
                           onClick={() => handleToggleAdmin(user.id, user.is_admin)}
                           disabled={!isSuperAdmin}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 transition-all ${isSuperAdmin ? "hover:bg-slate-200 dark:hover:bg-slate-700" : "opacity-75 cursor-default"}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface-muted text-fg-muted transition-all ${isSuperAdmin ? "hover:bg-border" : "opacity-75 cursor-default"}`}
                           title={isSuperAdmin ? t('userTip') : t('userDesc')}
                         >
                           <ShieldAlert size={14} />
@@ -298,13 +300,9 @@ const AdminUsers: React.FC = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleEditUser(user)}
-                        className="p-2 rounded-lg hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm hover:border-slate-200 dark:hover:border-slate-600 border border-transparent text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
-                        title={t('editUser')}
-                      >
+                      <IconButton aria-label={t('editUser')} size="sm" onClick={() => handleEditUser(user)}>
                         <Edit2 size={16} />
-                      </button>
+                      </IconButton>
                     </td>
                   </tr>
                 ))
@@ -323,14 +321,14 @@ const AdminUsers: React.FC = () => {
           <>
             <button
               onClick={() => setIsEditModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className={buttonClasses("ghost", "md")}
             >
               {t('cancel')}
             </button>
             <button
               onClick={handleSaveUser}
               disabled={isSaving}
-              className="px-5 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2"
+              className={buttonClasses("primary", "md")}
             >
               {isSaving && <Loader2 size={16} className="animate-spin" />}
               {t('save')}
@@ -340,21 +338,21 @@ const AdminUsers: React.FC = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-fg mb-1.5">Email</label>
             <input
               type="text"
               disabled
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 dark:text-slate-500 text-sm cursor-not-allowed"
+              className="w-full px-4 py-2 bg-surface-muted border border-border rounded-control text-fg-muted text-sm cursor-not-allowed"
               value={editingUser?.email || ""}
             />
-            <p className="mt-1 text-[11px] text-slate-400">{t('emailCantBeModified')}</p>
+            <p className="mt-1 text-[11px] text-fg-muted">{t('emailCantBeModified')}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('fullName')}</label>
+            <label className="block text-sm font-medium text-fg mb-1.5">{t('fullName')}</label>
             <input
               type="text"
               autoFocus
-              className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm"
+              className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm"
               value={editFields.name}
               onChange={(e) => setEditFields(prev => ({ ...prev, name: e.target.value }))}
             />
@@ -362,9 +360,9 @@ const AdminUsers: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('companies')}</label>
+              <label className="block text-sm font-medium text-fg mb-1.5">{t('companies')}</label>
               <select
-                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm"
+                className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm"
                 value={editFields.companyId}
                 onChange={(e) => setEditFields(prev => ({ ...prev, companyId: e.target.value }))}
               >
@@ -375,10 +373,10 @@ const AdminUsers: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('roleInCompany')}</label>
+              <label className="block text-sm font-medium text-fg mb-1.5">{t('roleInCompany')}</label>
               <select
                 disabled={!editFields.companyId}
-                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm disabled:opacity-50"
+                className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm disabled:opacity-50"
                 value={editFields.role}
                 onChange={(e) => setEditFields(prev => ({ ...prev, role: e.target.value as any }))}
               >
@@ -399,14 +397,14 @@ const AdminUsers: React.FC = () => {
           <>
             <button
               onClick={() => setIsCreateModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className={buttonClasses("ghost", "md")}
             >
               {t('cancel')}
             </button>
             <button
               onClick={handleCreateUser}
               disabled={isSaving || !newUser.email.trim()}
-              className="px-5 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2"
+              className={buttonClasses("primary", "md")}
             >
               {isSaving && <Loader2 size={16} className="animate-spin" />}
               {t('inviteUserButton')}
@@ -415,28 +413,28 @@ const AdminUsers: React.FC = () => {
         )}
       >
         <div className="space-y-4">
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-xl flex gap-3">
-            <Mail className="text-blue-500 dark:text-blue-400 shrink-0" size={20} />
-            <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+          <div className="p-3 bg-primary-soft border border-primary/20 rounded-control flex gap-3">
+            <Mail className="text-primary-soft-fg shrink-0" size={20} />
+            <p className="text-xs text-primary-soft-fg leading-relaxed">
               {t('inviteEmailSent')}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('userEmail')}</label>
+            <label className="block text-sm font-medium text-fg mb-1.5">{t('userEmail')}</label>
             <input
               type="email"
               placeholder={t('emailPlaceholder')}
-              className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm"
+              className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm"
               value={newUser.email}
               onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('fullName')}</label>
+            <label className="block text-sm font-medium text-fg mb-1.5">{t('fullName')}</label>
             <input
               type="text"
               placeholder={t('namePlaceholder')}
-              className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm"
+              className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm"
               value={newUser.name}
               onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
             />
@@ -444,9 +442,9 @@ const AdminUsers: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{t('companyOptional')}</label>
+              <label className="block text-sm font-medium text-fg mb-1.5">{t('companyOptional')}</label>
               <select
-                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm"
+                className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm"
                 value={newUser.companyId}
                 onChange={(e) => setNewUser(prev => ({ ...prev, companyId: e.target.value }))}
               >
@@ -459,10 +457,10 @@ const AdminUsers: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('roleInCompany')}</label>
+              <label className="block text-sm font-medium text-fg mb-1.5">{t('roleInCompany')}</label>
               <select
                 disabled={!newUser.companyId}
-                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-slate-100 transition-all text-sm disabled:opacity-50"
+                className="w-full px-4 py-2 bg-surface text-fg border border-border rounded-control hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary transition-colors text-sm disabled:opacity-50"
                 value={newUser.role}
                 onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value as any }))}
               >
@@ -473,16 +471,16 @@ const AdminUsers: React.FC = () => {
           </div>
 
           {isSuperAdmin && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/50 rounded-xl">
+            <div className="flex items-center gap-2 p-3 bg-warning-soft border border-warning/25 rounded-control">
               <input
                 type="checkbox"
                 id="isSuperAdmin"
-                className="w-4 h-4 text-blue-600 border-slate-300 dark:border-slate-600 rounded focus:ring-blue-500"
+                className="w-4 h-4 accent-primary border-border-strong rounded focus-visible:ring-2 focus-visible:ring-ring"
                 checked={newUser.isSuperAdmin}
                 onChange={(e) => setNewUser(prev => ({ ...prev, isSuperAdmin: e.target.checked }))}
               />
-              <label htmlFor="isSuperAdmin" className="text-sm font-medium text-amber-900 dark:text-amber-400 flex items-center gap-1.5">
-                <ShieldCheck size={16} className="text-amber-600 dark:text-amber-500" />
+              <label htmlFor="isSuperAdmin" className="text-sm font-medium text-fg flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-warning" />
                 {t('isSuperAdminGlobal')}
               </label>
             </div>
