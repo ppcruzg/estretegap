@@ -14,7 +14,6 @@ export default tseslint.config(
       ".agents",
       ".atl",
       "supabase/functions",
-      "check_db.js",
     ],
   },
   {
