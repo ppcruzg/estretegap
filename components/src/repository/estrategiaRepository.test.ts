@@ -160,9 +160,26 @@ describe("updateItem / deleteItem", () => {
     expect(op(calls[0], "eq")).toEqual([["id", "i1"]]);
   });
 
-  // BUG: deleteItem and deleteColumn ignore the supabase `error` (e.g. an RLS
-  // denial), so the UI believes the row was deleted while it still exists.
-  it.todo("deleteItem / deleteColumn reject when supabase returns an error");
+  it("deleteItem rejects when supabase returns an error", async () => {
+    const error = { message: "denied" };
+    results.push({ data: null, error });
+    await expect(repo.deleteItem("i1")).rejects.toBe(error);
+    expect(calls[0].table).toBe("items");
+    expect(op(calls[0], "eq")).toEqual([["id", "i1"]]);
+  });
+
+  it("deleteColumn rejects when supabase returns an error", async () => {
+    const error = { message: "denied" };
+    results.push({ data: null, error });
+    await expect(repo.deleteColumn("c1")).rejects.toBe(error);
+    expect(calls[0].table).toBe("columns");
+    expect(op(calls[0], "eq")).toEqual([["id", "c1"]]);
+  });
+
+  it("deleteItem resolves when supabase succeeds", async () => {
+    results.push({ data: null, error: null });
+    await expect(repo.deleteItem("i1")).resolves.toBeUndefined();
+  });
 });
 
 describe("system config & project tags", () => {

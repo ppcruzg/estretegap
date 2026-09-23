@@ -279,6 +279,7 @@ const PageView: React.FC = () => {
       console.warn('Blocked: user has no edit permissions');
       return;
     }
+    const snapshot = currentPage;
     setCurrentPage((prev: any) =>
       prev
         ? {
@@ -287,7 +288,13 @@ const PageView: React.FC = () => {
         }
         : prev
     );
-    await Repo.deleteColumn(columnId);
+    try {
+      await Repo.deleteColumn(columnId);
+    } catch (error) {
+      console.error("Error deleting column:", error);
+      setCurrentPage(snapshot);
+      alert(t('deleteColumnError'));
+    }
   };
 
   // ======================================================
@@ -376,6 +383,7 @@ const PageView: React.FC = () => {
       console.warn('Blocked: user has no edit permissions');
       return;
     }
+    const snapshot = currentPage;
     setCurrentPage((prev: any) =>
       prev
         ? {
@@ -391,7 +399,13 @@ const PageView: React.FC = () => {
         }
         : prev
     );
-    await Repo.deleteItem(itemId);
+    try {
+      await Repo.deleteItem(itemId);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      setCurrentPage(snapshot);
+      alert(t('deleteItemError'));
+    }
   };
 
   const handleUpdateColumnStatuses = async (

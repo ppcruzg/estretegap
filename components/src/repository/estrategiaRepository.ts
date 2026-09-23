@@ -231,7 +231,8 @@ export async function updateColumn(columnId: string, fields: any) {
 }
 
 export async function deleteColumn(columnId: string) {
-  await supabase.from("columns").delete().eq("id", columnId);
+  const { error } = await supabase.from("columns").delete().eq("id", columnId);
+  if (error) throw error;
 }
 
 export async function reorderColumns(pageId: string, orderedIds: string[]) {
@@ -302,7 +303,8 @@ export async function updateItem(itemId: string, fields: any) {
 }
 
 export async function deleteItem(itemId: string) {
-  await supabase.from("items").delete().eq("id", itemId);
+  const { error } = await supabase.from("items").delete().eq("id", itemId);
+  if (error) throw error;
 }
 
 export async function reorderItems(columnId: string, orderedIds: string[]) {
